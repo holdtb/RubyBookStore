@@ -1,0 +1,10 @@
+source "https://rubygems.org"
+
+gem 'sinatra'
+gem 'sinatra-reloader'
+gem 'mongo'
+gem 'mongo_mapper'
+gem 'rack'
+gem 'rspec'
+gem 'pry'
+gem 'pry-byebug'
