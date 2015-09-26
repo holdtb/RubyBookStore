@@ -13,7 +13,6 @@
 <div class="navbar navbar-default" id="subnav">
   <div class="col-md-12">
     <div class="navbar-header">
-
       <a href="#" style="margin-left:15px;" class="navbar-btn btn btn-default btn-plus dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart" style="color:#1111dd;"></span> Buying <small><i class="glyphicon glyphicon-chevron-down"></i></small></a>
       <ul class="nav dropdown-menu">
         <li><a href="buying"><i class="glyphicon glyphicon-shopping-cart" style="color:#1111dd;"></i> Buying</a></li>
@@ -26,6 +25,7 @@
         <li class="nav-divider"></li>
         <li><a href="#"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
       </ul>
+      <%=defined?(@user) ? @user : "Guest" %>
     </div>
   </div>
 </div>
@@ -33,43 +33,43 @@
 
 <!--main-->
 <div class="container" id="main">
-   <div class="row" align="center">
-     <div class="col-md-6 col-sm-8 col col-sm-offset-3">
+  <div class="row" align="center">
+    <div class="col-md-6 col-sm-8 col col-sm-offset-3">
       <div class="well">
         <h4>Search for books </br><span style="font-size:65%">Enter as much information as you can</span></h4>
-        <form class="" action="buying_search.php" method="post">
+        <form class="" action="/buying" method="post">
           <div class="input-group" style="max-width:470px;">
-            <input type="text" class="form-control" placeholder="ISBN" name="srchisbn" id="srchisbn">
-            <input type="text" class="form-control" placeholder="Title" name="srchtitle" id="srchtitle">
-            <input type="text" class="form-control" placeholder="Author" name="srchauth" id="srchauth">
+            <input type="text" class="form-control" placeholder="ISBN" name="isbn" id="isbn">
+            <input type="text" class="form-control" placeholder="Title" name="title" id="title">
+            <input type="text" class="form-control" placeholder="Author" name="author" id="srchauth">
             <button class="btn btn-default btn-primary" style="margin-top:10px;" type="submit"><i class="glyphicon glyphicon-search"></i> Search</button>
+          </div>
         </form>
       </div>
+      <h3>Recent Posts:</h3>
     </div>
-     <h3>Recent Posts:</h3>
   </div>
-</div>
 
-<div class="row">
-  <% @recent_books.each do |book| %>
-  <div class="col-md-4 col-sm-6">
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title"><%= book.title %></h3>
-      </div>
-      <div class="panel-body">
-        <p>
-          <img src="<%=book.thumbnail%>" class="img-thumbnail pull-right">
-          <strong>Condition: </strong><%=book.condition%> </br>
-          <strong>Authors: </strong><%= book.authors * ", " %></br>
-          <strong>Price: </strong>$<%= book.price %></br>
-        </p>
-        <div class="clearfix"></div>
-        <hr>
-        <a href="#">Buy Book</a>
+  <div class="row">
+    <% @recent_books.each do |book| %>
+    <div class="col-md-4 col-sm-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><%= book.title %></h3>
+        </div>
+        <div class="panel-body">
+          <p>
+            <img src="<%=book.thumbnail%>" class="img-thumbnail pull-right">
+            <strong>Condition: </strong> </br>
+            <strong>Authors: </strong><%= book.authors * ", " %></br>
+            <strong>Price: </strong>$</br>
+          </p>
+          <div class="clearfix"></div>
+          <hr>
+          <a href="#">Buy Book</a>
+        </div>
       </div>
     </div>
+    <% end %>
   </div>
-  <% end %>
-</div>
 </div>

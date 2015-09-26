@@ -2,12 +2,17 @@ require 'mongo_mapper'
 
 class Book
   include MongoMapper::Document
-  set_collection_name "Books"
+  set_collection_name "BOOKS"
 
   key :title, String, :required => true
   key :isbn, String, :required => true
-  key :authors, Array, :required => true
   key :publisher, String
+  key :year, String
+  key :edition, String
+  key :tstamp, Date
   key :thumbnail, String
+
+  many :authors
+  
   timestamps!
 end
