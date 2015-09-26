@@ -6,12 +6,14 @@ require 'mongo_mapper'
 require 'uri'
 require 'net/http'
 require 'httparty'
+require 'json'
 
 require_relative './bookstore_helpers'
 require_relative './lib/cas/cas_helpers'
 require_relative 'model/books'
 require_relative 'model/orders'
 require_relative 'model/archive'
+require_relative 'model/authors'
 
 class Bookstore < Sinatra::Base
   helpers Sinatra::ContentFor
@@ -70,8 +72,8 @@ class Bookstore < Sinatra::Base
     @user = session[:cas_user]
 
     isbn = find_isbn(params)
-    isbn = scrape(params) if isbn.nil?
-    create_listing(book)
+    scrape(params) if isbn.nil?
+    #create_listing(book)
   end
 
   get '/not_found' do
@@ -94,12 +96,35 @@ class Bookstore < Sinatra::Base
     if params[:isbn] != "" then
       url = "https://www.googleapis.com/books/v1/volumes?q=isbn:#{params[:isbn]}"
       response = HTTParty.get(url, :verify => false)
+      parsed_response = JSON.parse(response.body)
     end
-    add_to_db(response.body)
+    add_to_db(parsed_response)
   end
 
   def add_to_db(json)
-    binding.pry
+    puts "Adding to db..."
+    volume_info = json['items'][0]['volumeInfo']
+    title = volume_info['title']
+    isbn = volume_info['industryIdentifiers'][0]['identifier']
+    publisher = volume_info['publisher']
+    year = volume_info['publishedDate']
+    description = volume_info['description']
+    pages = volume_info['pageCount']
+    avg_rating = volume_info['averageRating']
+    thumbnail = volume_info['imageLinks']['thumbnail']
+    authors = volume_info['authors']
+
+    book = Book.create({
+      :title => title,
+      :isbn => isbn,
+      :publisher => publisher,
+      :year => year,
+      :description => description,
+      :pages => pages,
+      :avgRating => avg_rating,
+      :thumbnail => thumbnail,
+      :authors => authors.map{|a| Author.new(:name => a)}
+    })
   end
 
   def create_listing(isbn)

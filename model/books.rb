@@ -9,10 +9,12 @@ class Book
   key :publisher, String
   key :year, String
   key :edition, String
-  key :tstamp, Date
+  key :description, String
+  key :pages, Integer
+  key :avgRating, Float
   key :thumbnail, String
 
   many :authors
-  
+
   timestamps!
 end
