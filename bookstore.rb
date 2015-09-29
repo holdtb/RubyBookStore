@@ -7,6 +7,7 @@ require 'uri'
 require 'net/http'
 require 'httparty'
 require 'json'
+require 'lisbn'
 
 require_relative './bookstore_helpers'
 require_relative './lib/cas/cas_helpers'
@@ -70,31 +71,66 @@ class Bookstore < Sinatra::Base
   post '/selling' do
     require_authorization(request, session) unless logged_in?(request, session)
     @user = session[:cas_user]
-
-    isbn = find_isbn(params)
-    scrape(params) if isbn.nil?
+    book_for_sale = find_book_for_sale(params)
     #create_listing(book)
+  end
+
+  get '/selling/confirm' do
+    require_authorization(request, session) unless logged_in?(request, session)
+    @user = session[:cas_user]
+
+    @condition = session[:condition]
+    @price = session[:price]
+    @book = Book.find(session[:book_id])
+    @authors = Author.where(:book_id => session[:book_id]).all
+
+    erb :sell_book_confirm
+  end
+
+  get '/selling/sell' do
+
   end
 
   get '/not_found' do
     erb :not_found
   end
 
-  def find_isbn(params)
-    puts "Finding isbns..."
-    isbn = Book.first("isbn" => params[:isbn]) if params[:isbn] != ""
-    return isbn if isbn
+  def find_book_for_sale(params)
+    if(params[:isbn] != "") then
+      stripped_isbn = params[:isbn].gsub('-','')
+      isbn = Lisbn.new(stripped_isbn)
+      book = scrape_and_find(isbn)
+      confirm_listing(book._id, params[:price], params[:condition])
+    end
+    #TODO -- add support for author and title search
+  end
 
-    # if params[:author] != "" && params[:title] != "" then
-    #   author = Author.where(:author => params[:author])
-    # end
+  def confirm_listing(book_id, price, condition)
+    require_authorization(request, session) unless logged_in?(request, session)
+    @user = session[:cas_user]
+    session[:condition] = condition
+    session[:price] = price
+    session[:book_id] = book_id
+    redirect '/selling/confirm'
+  end
+
+  def scrape_and_find(isbn)
+    isbn.isbn13 if isbn.valid?
+    book = find_book_by_isbn(isbn)
+    if book.nil? then
+      scrape(isbn)
+    end
+    book = find_book_by_isbn(isbn)
+  end
+
+  def find_book_by_isbn(isbn)
+    return Book.first("isbn" => isbn) if isbn != "" && Book.first("isbn" => isbn)
     return nil
   end
 
-  def scrape(params)
-    puts "Scraping..."
-    if params[:isbn] != "" then
-      url = "https://www.googleapis.com/books/v1/volumes?q=isbn:#{params[:isbn]}"
+  def scrape(isbn)
+    if isbn != "" then
+      url = "https://www.googleapis.com/books/v1/volumes?q=isbn:#{isbn}"
       response = HTTParty.get(url, :verify => false)
       parsed_response = JSON.parse(response.body)
     end
@@ -102,10 +138,10 @@ class Bookstore < Sinatra::Base
   end
 
   def add_to_db(json)
-    puts "Adding to db..."
     volume_info = json['items'][0]['volumeInfo']
     title = volume_info['title']
-    isbn = volume_info['industryIdentifiers'][0]['identifier']
+    isbn_holder = volume_info['industryIdentifiers'].select{|n| n['type'] == "ISBN_13"}.first
+    isbn = isbn_holder['identifier']
     publisher = volume_info['publisher']
     year = volume_info['publishedDate']
     description = volume_info['description']
