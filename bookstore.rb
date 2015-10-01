@@ -32,7 +32,13 @@ class Bookstore < Sinatra::Base
   end
 
   get '/buying' do
-    @recent_books = Book.all
+    @recent_posts= Post.all
+    @authors = []
+    @recent_posts.each do |post|
+      authors = Author.where(:book_id => post.book_id).fields(:name).all
+      @authors << authors.map(&:name)
+    end
+    #binding.pry
     erb :buying
   end
 
