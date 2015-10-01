@@ -23,17 +23,15 @@ class Bookstore < Sinatra::Base
 
   before do
     process_cas_login(request, session)
+    require_authorization(request, session) unless logged_in?(request, session)
+    @user = session[:cas_user]
   end
-
 
   get '/' do
     erb :index
   end
 
   get '/buying' do
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-
     @recent_books = Book.all
     erb :buying
   end
@@ -52,23 +50,14 @@ class Bookstore < Sinatra::Base
   end
 
   get '/selling' do
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-
     erb :selling
   end
 
   post '/selling' do
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
     book_for_sale = find_book_for_sale(params)
   end
 
   get '/selling/confirm' do
-
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-
     @condition = session[:condition]
     @price = session[:price]
     @book = Book.find(session[:book_id])
@@ -78,13 +67,18 @@ class Bookstore < Sinatra::Base
   end
 
   get '/selling/sell' do
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
+    post = Post.new(
+                   :book_id => session[:book_id],
+                   :seller => @user,
+                   :price => session[:price],
+                   :condition => session[:condition])
 
-    @condition = session[:condition]
-    @price = session[:price]
-    @book = Book.find(session[:book_id])
-    @authors = Author.where(:book_id => session[:book_id]).all
+    post.save!
+    redirect '/selling/success'
+  end
+
+  get '/selling/success' do
+    erb :sale_success
   end
 
   get '/not_found' do
@@ -93,9 +87,10 @@ class Bookstore < Sinatra::Base
 
   def find_book_for_sale(params)
     if(params[:isbn] != "") then
-      stripped_isbn = params[:isbn].gsub('-','')
+      stripped_isbn = params[:isbn].gsub('-','').strip
       isbn = Lisbn.new(stripped_isbn)
       book = scrape_and_find(isbn)
+      redirect '/error' if book.nil?
       confirm_listing(book._id, params[:price], params[:condition])
     end
     #TODO -- add support for author and title search
@@ -108,16 +103,6 @@ class Bookstore < Sinatra::Base
     session[:price] = price
     session[:book_id] = book_id
     redirect '/selling/confirm'
-  end
-
-  def create_listing(book_id)
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-
-    @condition = session[:condition]
-    @price = session[:price]
-    @book = Book.find(session[:book_id])
-    @authors = Author.where(:book_id => session[:book_id]).all
   end
 
 end

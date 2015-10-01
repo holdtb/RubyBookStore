@@ -1,16 +1,13 @@
 require 'mongo_mapper'
-class Order
+class Post
   include MongoMapper::Document
-  set_collection_name "ORDERS"
+  set_collection_name "POSTINGS"
 
   key :book_id, ObjectId
-  key :seller_username, String
-  key :buyer_username, String
-  key :location, String
+  key :seller, String
   key :price, Float
   key :condition, String
 
   many :offers
-
   timestamps!
 end
