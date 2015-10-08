@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra/base'
 require 'sinatra/reloader'
 require 'sinatra/content_for'
+require 'sinatra/formkeeper'
 require 'mongo_mapper'
 require 'lisbn'
 require_relative './lib/cas/cas_helpers'
@@ -12,6 +13,7 @@ class Bookstore < Sinatra::Base
   set :public_folder, 'public'
   helpers Sinatra::ContentFor
   register Sinatra::Reloader
+  register Sinatra::FormKeeper
   use Rack::Session::Cookie, :secret => 'bookstore'
   helpers GoogleBookScraper
   helpers CasHelpers
@@ -67,7 +69,39 @@ class Bookstore < Sinatra::Base
   end
 
   post '/selling' do
-    book_for_sale = find_book_for_sale(params)
+    form do
+      field :isbn, :length => 10..16
+      #field :title
+      #field :author
+      any :condition, ["Perfect", "Good", "Fair", "Poor", "Very Poor"]
+    end
+
+    if form.failed?
+      output = erb :selling
+      fill_in_form(output)
+    else
+      book_for_sale = find_book_for_sale(params)
+    end
+  end
+
+  def find_book_for_sale(params)
+    if(params[:isbn] != "") then
+      stripped_isbn = params[:isbn].gsub('-','').strip
+      isbn = Lisbn.new(stripped_isbn)
+      book = scrape_and_find(isbn)
+      redirect '/error' if book.nil?
+      confirm_listing(book._id, params[:price], params[:condition])
+    end
+    #TODO -- add support for author and title search
+  end
+
+  def confirm_listing(book_id, price, condition)
+    require_authorization(request, session) unless logged_in?(request, session)
+    @user = session[:cas_user]
+    session[:condition] = condition
+    session[:price] = price
+    session[:book_id] = book_id
+    redirect '/selling/confirm'
   end
 
   get '/selling/confirm' do
@@ -98,24 +132,6 @@ class Bookstore < Sinatra::Base
     erb :not_found
   end
 
-  def find_book_for_sale(params)
-    if(params[:isbn] != "") then
-      stripped_isbn = params[:isbn].gsub('-','').strip
-      isbn = Lisbn.new(stripped_isbn)
-      book = scrape_and_find(isbn)
-      redirect '/error' if book.nil?
-      confirm_listing(book._id, params[:price], params[:condition])
-    end
-    #TODO -- add support for author and title search
-  end
 
-  def confirm_listing(book_id, price, condition)
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-    session[:condition] = condition
-    session[:price] = price
-    session[:book_id] = book_id
-    redirect '/selling/confirm'
-  end
 
 end
