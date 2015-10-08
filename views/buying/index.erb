@@ -23,7 +23,7 @@
         <li class="nav-divider"></li>
         <li><a href="/offers"><i class="glyphicon glyphicon-inbox" style="color:#6f5499;"></i> View Offers</a></li>
         <li class="nav-divider"></li>
-        <li><a href="#"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
+        <li><a href="https://websso.wwu.edu/cas/logout"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
       </ul>
       <%=defined?(@user) ? @user : "Guest" %>
     </div>
@@ -50,7 +50,8 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row text-center">
+    <h4><%= "Sorry, no recent posts. Check back soon." unless @recent_posts.length > 0 %></h4>
     <% @recent_posts.each_with_index do |post, i| %>
     <div class="col-md-6 col-sm-8">
       <div class="panel panel-primary">
@@ -60,8 +61,9 @@
         <div class="panel-body">
           <p>
             <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-right">
-            <strong>Condition: </strong><%= post.condition.capitalize! %> </br>
+            <strong>Isbn: </strong><%= Book.find(post.book_id).isbn %></br>
             <strong>Authors: </strong><%= @authors[i].join(", ") %></br>
+            <strong>Condition: </strong><%= post.condition.capitalize! %></br>
             <strong>Price: </strong>$<%= session[:price] %></br>
           </p>
           <div class="clearfix"></div>
