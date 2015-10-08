@@ -16,5 +16,4 @@ class Book
 
   many :authors
 
-  timestamps!
 end

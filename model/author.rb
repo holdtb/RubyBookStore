@@ -6,5 +6,4 @@ class Author
   key :name, String, :required => true
   belongs_to :book
 
-  timestamps!
 end

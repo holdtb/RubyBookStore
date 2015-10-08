@@ -5,7 +5,8 @@ class Offer
 
   key :buyer, String, :required => true
   key :seller, String, :required => true
+  key :price, Integer, :required => true
 
-  belongs_to :order
+  belongs_to :post
   timestamps!
 end

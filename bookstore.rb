@@ -40,7 +40,7 @@ class Bookstore < Sinatra::Base
       authors = Author.where(:book_id => post.book_id).fields(:name).all
       @authors << authors.map(&:name)
     end
-    erb :buying
+    erb :"buying/index"
   end
 
   post '/buying' do
@@ -56,16 +56,8 @@ class Bookstore < Sinatra::Base
     # redirect '/search_results'
   end
 
-  get '/offer/:post_id' do
-    @post = Post.find(params[:post_id])
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => session[:book_id]).all
-    @authors = authors.map(&:name)
-    erb :offer
-  end
-
   get '/selling' do
-    erb :selling
+    erb :"selling/index"
   end
 
   post '/selling' do
@@ -79,11 +71,75 @@ class Bookstore < Sinatra::Base
     end
 
     if form.failed?
-      output = erb :selling
+      output = erb :"selling/index"
       fill_in_form(output)
     else
       book_for_sale = find_book_for_sale(params)
     end
+  end
+
+  get '/offer/make/:post_id' do
+    erb :"buying/offer"
+  end
+
+  get '/offer/make/asking/:post_id' do
+    #Email post.seller@students.wwu.edu with the offer
+    #Create Offer in DB -- buyer is cas user, seller is post.seller
+    post = Post.find(params[:post_id])
+    offer = Offer.new({
+                    :seller => post.seller,
+                    :buyer => @user,
+                    :price => post.price,
+                    :post_id => post._id
+                    })
+    post.offers << offer
+    post.save!
+    redirect '/offer/success'
+  end
+
+  get '/offer/success' do
+    erb :"buying/success"
+  end
+  get '/offer/:post_id' do
+    @post = Post.find(params[:post_id])
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => session[:book_id]).all
+    @authors = authors.map(&:name)
+    erb :"buying/offer"
+  end
+
+  get '/selling/confirm' do
+    @condition = session[:condition]
+    @price = session[:price]
+    @book = Book.find(session[:book_id])
+    @authors = Author.where(:book_id => session[:book_id]).all
+
+    erb :"selling/confirm"
+  end
+
+  get '/selling/sell' do
+    post = Post.new(
+                   :book_id => session[:book_id],
+                   :seller => @user,
+                   :price => session[:price],
+                   :condition => session[:condition]
+                   )
+
+    post.save!
+    redirect '/selling/success'
+  end
+
+  get '/selling/success' do
+    erb :"selling/success"
+  end
+
+  get '/not_found' do
+    erb :not_found
+  end
+
+  get '/offers' do
+    @posts = Post.where(:seller => @user).all
+    erb :"offers/index"
   end
 
   def find_book_for_sale(params)
@@ -105,35 +161,5 @@ class Bookstore < Sinatra::Base
     session[:book_id] = book_id
     redirect '/selling/confirm'
   end
-
-  get '/selling/confirm' do
-    @condition = session[:condition]
-    @price = session[:price]
-    @book = Book.find(session[:book_id])
-    @authors = Author.where(:book_id => session[:book_id]).all
-
-    erb :sell_book_confirm
-  end
-
-  get '/selling/sell' do
-    post = Post.new(
-                   :book_id => session[:book_id],
-                   :seller => @user,
-                   :price => session[:price],
-                   :condition => session[:condition])
-
-    post.save!
-    redirect '/selling/success'
-  end
-
-  get '/selling/success' do
-    erb :sale_success
-  end
-
-  get '/not_found' do
-    erb :not_found
-  end
-
-
 
 end

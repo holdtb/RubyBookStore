@@ -7,7 +7,7 @@ class Post
   key :seller, String
   key :price, Float
   key :condition, String
-
+  
   many :offers
   timestamps!
 end
