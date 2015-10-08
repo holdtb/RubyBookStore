@@ -69,11 +69,13 @@ class Bookstore < Sinatra::Base
   end
 
   post '/selling' do
+    #binding.pry
     form do
-      field :isbn, :length => 10..16
+      field :isbn, :present => true, :length => 10..16
+      field :price, :present => true, :int => {:gte => 0}
       #field :title
       #field :author
-      any :condition, ["Perfect", "Good", "Fair", "Poor", "Very Poor"]
+      field :condition, :present => true, :regexp => %r{^.*(perfect|good|fair|poor|very poor).*$}
     end
 
     if form.failed?

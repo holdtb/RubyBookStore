@@ -46,6 +46,9 @@
           <% if form.failed_on?(:condition) %>
           <p style="color:red;">You must enter a condition.</p>
           <% end %>
+          <% if form.failed_on?(:price) %>
+          <p style="color:red;">You must enter a sale price.</p>
+          <% end %>
         <% end %>
         <form action="/selling" method="post" style="max-width:500px;">
           <div class="input-group" style="max-width:470px;">
