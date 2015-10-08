@@ -38,7 +38,6 @@ class Bookstore < Sinatra::Base
       authors = Author.where(:book_id => post.book_id).fields(:name).all
       @authors << authors.map(&:name)
     end
-    #binding.pry
     erb :buying
   end
 
@@ -53,6 +52,14 @@ class Bookstore < Sinatra::Base
     # end
     # redirect '/not_found' unless @orders
     # redirect '/search_results'
+  end
+
+  get '/offer/:post_id' do
+    @post = Post.find(params[:post_id])
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => session[:book_id]).all
+    @authors = authors.map(&:name)
+    erb :offer
   end
 
   get '/selling' do
