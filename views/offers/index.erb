@@ -44,9 +44,11 @@
          <div class="panel-body">
            <p>
              <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
+             <strong>List Date: </strong><%= post.created_at %></br>
              <strong>List Price: </strong>$<%= session[:price] %></br></br>
              <strong>Condition: </strong><%= post.condition.capitalize! %> </br>
              <strong>Offers: </strong></br>
+             <h4><%= "No offers yet" if post.offers.length < 1 %></h4>
              <% prices = post.offers.map(&:price) %>
              <% offer = post.offers.map(&:_id) %>
              <% buyers = post.offers.map(&:buyer) %>

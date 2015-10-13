@@ -13,7 +13,7 @@ class Book
   key :pages, Integer
   key :avgRating, Float
   key :thumbnail, String
-
+  
+  many :posts
   many :authors
-
 end

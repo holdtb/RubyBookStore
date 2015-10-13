@@ -44,16 +44,33 @@ class Bookstore < Sinatra::Base
   end
 
   post '/buying' do
-    # book_isbns = params[:isbn] if params[:isbn]
-    # book << Book.where(:title => params[:title]) if params[:title]
-    # book_isbns << book.isbn if params[:title]
-    # book << Book.where(:author => params[:author]) if params[:author]
-    # book_isbns << book.isbn if params[:author]
-    # book_isbns.each do |isbn|
-    #   @orders << Orders.where(:isbn => isbn)
-    # end
-    # redirect '/not_found' unless @orders
-    # redirect '/search_results'
+    book_isbns = []
+    if params[:isbn] != "" then
+      stripped_isbn = params[:isbn].gsub('-','').strip
+      lisbn = Lisbn.new(stripped_isbn)
+      isbn = lisbn.isbn13.to_s if lisbn.valid?
+      book_isbns << isbn if isbn
+    end
+
+    book = Book.where(:title => /#{Regexp.escape(params[:title])}/).all if params[:title] != ""
+    book_isbns.concat book.each{|b| b.isbn} if book && book.lenth > 0
+    books =  Book.where(:author => /#{Regexp.escape(params[:author])}/).all if params[:author] != ""
+    book_isbns.concat  book.each{|b| b.isbn} if books && books.lenth > 0
+    #binding.pry
+    @posts = []
+    book_isbns.each do |isbn|
+      book = Book.where(:isbn => isbn).all.first
+      posts = Post.where(:book_id => book._id).all
+      @posts.concat posts if posts.length > 0
+    end
+    @authors = []
+    @posts.each do |post|
+      authors = Author.where(:book_id => post.book_id).fields(:name).all
+      @authors << authors.map(&:name)
+    end
+
+    redirect '/not_found' unless @posts.length > 0
+    erb :"/buying/results"
   end
 
   get '/selling' do
@@ -118,14 +135,16 @@ class Bookstore < Sinatra::Base
   end
 
   get '/selling/sell' do
+    book = Book.find(session[:book_id])
     post = Post.new(
-                   :book_id => session[:book_id],
+                   :book => book,
                    :seller => @user,
                    :price => session[:price],
                    :condition => session[:condition]
                    )
-
+    book.reload
     post.save!
+    book.reload
     redirect '/selling/success'
   end
 
