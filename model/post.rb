@@ -1,7 +1,7 @@
 require 'mongo_mapper'
 class Post
   include MongoMapper::Document
-  set_collection_name "POSTS"
+  set_collection_name "posts"
 
 
   key :seller, String

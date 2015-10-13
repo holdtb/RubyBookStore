@@ -52,11 +52,8 @@ class Bookstore < Sinatra::Base
       book_isbns << isbn if isbn
     end
 
-    book = Book.where(:title => /#{Regexp.escape(params[:title])}/).all if params[:title] != ""
-    book_isbns.concat book.each{|b| b.isbn} if book && book.lenth > 0
-    books =  Book.where(:author => /#{Regexp.escape(params[:author])}/).all if params[:author] != ""
-    book_isbns.concat  book.each{|b| b.isbn} if books && books.lenth > 0
-    #binding.pry
+    book = Book.where(:title => /#{Regexp.escape(params[:title])}/i).all if params[:title] != ""
+    book_isbns.concat book.map(&:isbn) if book && book.length > 0
     @posts = []
     book_isbns.each do |isbn|
       book = Book.where(:isbn => isbn).all.first
