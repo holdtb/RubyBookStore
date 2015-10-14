@@ -35,7 +35,7 @@
 <div class="container" id="main">
    <div align="center">
      <div class="col-md-12">
-     <h1>Your Offers:</h1>
+     <h1>Your Posts:</h1>
      <% @posts.each_with_index do |post, i|%>
        <div class="panel panel-primary">
          <div class="panel-heading">
@@ -48,12 +48,13 @@
              <strong>List Price: </strong>$<%= session[:price] %></br></br>
              <strong>Condition: </strong><%= post.condition.capitalize! %> </br>
              <strong>Offers: </strong></br>
-             <h4><%= "No offers yet" if post.offers.length < 1 %></h4>
+             <%= "<h4>No offers yet</h4>" if post.offers.length < 1 %>
              <% prices = post.offers.map(&:price) %>
              <% offer = post.offers.map(&:_id) %>
              <% buyers = post.offers.map(&:buyer) %>
              <% prices.each_with_index do |p, i| %>
-            <a <%= "href='/offer/accept/#{post.offers[i]._id}'"%>><button  class="btn-success">Accept</button></a> $<%= p %> - offered on <%=post.offers[i].created_at %></br></br>
+              <a <%= "href='/offer/accept/#{post.offers[i]._id}'"%>><button  class="btn-success">Accept</button></a> $<%= p %> - offered on <%=post.offers[i].created_at %>
+              <a <%= "href='/offer/decline/#{post.offers[i]._id}'"%>><button  class="btn-danger">Decline</button></a></br></br>
              <% end %>
            </p>
          </div>

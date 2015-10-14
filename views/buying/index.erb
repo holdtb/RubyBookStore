@@ -50,7 +50,7 @@
   </div>
 
   <div class="row text-center">
-    <h4><%= "Sorry, no recent posts. Check back soon." unless @recent_posts.length > 0 %></h4>
+  <%= "<h4>Sorry, no recent posts. Check back soon.</h4>" unless @recent_posts.length > 0 %>
     <% @recent_posts.each_with_index do |post, i| %>
     <div class="col-md-6 col-sm-8">
       <div class="panel panel-primary">

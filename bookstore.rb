@@ -5,8 +5,7 @@ require 'sinatra/content_for'
 require 'sinatra/formkeeper'
 require 'mongo_mapper'
 require 'lisbn'
-require_relative './lib/cas/cas_helpers'
-require_relative './lib/util/google_books_scraper'
+Dir.glob('lib/**/*.rb') { |f| require_relative f }
 Dir["./model/*.rb"].each {|file| require file }
 
 class Bookstore < Sinatra::Base
@@ -17,6 +16,7 @@ class Bookstore < Sinatra::Base
   use Rack::Session::Cookie, :secret => 'bookstore'
   helpers GoogleBookScraper
   helpers CasHelpers
+  helpers BookstoreHelper
 
   configure do
     MongoMapper.connection = Mongo::Connection.new("localhost", 27017)
@@ -34,38 +34,15 @@ class Bookstore < Sinatra::Base
   end
 
   get '/buying' do
-    @recent_posts= Post.all
-    @authors = []
-    @recent_posts.each do |post|
-      authors = Author.where(:book_id => post.book_id).fields(:name).all
-      @authors << authors.map(&:name)
-    end
+    @recent_posts = get_new_posts
+    @authors = get_authors(@recent_posts)
     erb :"buying/index"
   end
 
   post '/buying' do
-    book_isbns = []
-    if params[:isbn] != "" then
-      stripped_isbn = params[:isbn].gsub('-','').strip
-      lisbn = Lisbn.new(stripped_isbn)
-      isbn = lisbn.isbn13.to_s if lisbn.valid?
-      book_isbns << isbn if isbn
-    end
-
-    book = Book.where(:title => /#{Regexp.escape(params[:title])}/i).all if params[:title] != ""
-    book_isbns.concat book.map(&:isbn) if book && book.length > 0
-    @posts = []
-    book_isbns.each do |isbn|
-      book = Book.where(:isbn => isbn).all.first
-      posts = Post.where(:book_id => book._id).all
-      @posts.concat posts if posts.length > 0
-    end
-    @authors = []
-    @posts.each do |post|
-      authors = Author.where(:book_id => post.book_id).fields(:name).all
-      @authors << authors.map(&:name)
-    end
-
+    book_isbns = get_book_isbns(params)
+    @posts = get_posts(book_isbns)
+    @authors = get_authors(@posts)
     redirect '/not_found' unless @posts.length > 0
     erb :"/buying/results"
   end
@@ -75,52 +52,10 @@ class Bookstore < Sinatra::Base
   end
 
   post '/selling' do
-    #binding.pry
-    form do
-      field :isbn, :present => true, :length => 10..16
-      field :price, :present => true, :int => {:gte => 0}
-      #field :title
-      #field :author
-      field :condition, :present => true, :regexp => %r{^.*(perfect|good|fair|poor|very poor).*$}
-    end
-
-    if form.failed?
-      output = erb :"selling/index"
-      fill_in_form(output)
-    else
-      book_for_sale = find_book_for_sale(params)
-    end
+    validate_sale
   end
 
-  get '/offer/make/:post_id' do
-    erb :"buying/offer"
-  end
 
-  get '/offer/make/asking/:post_id' do
-    #Email post.seller@students.wwu.edu with the offer
-    #Create Offer in DB -- buyer is cas user, seller is post.seller
-    post = Post.find(params[:post_id])
-    offer = Offer.new({
-                    :seller => post.seller,
-                    :buyer => @user,
-                    :price => post.price,
-                    :post_id => post._id
-                    })
-    post.offers << offer
-    post.save!
-    redirect '/offer/success'
-  end
-
-  get '/offer/success' do
-    erb :"buying/success"
-  end
-  get '/offer/:post_id' do
-    @post = Post.find(params[:post_id])
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => session[:book_id]).all
-    @authors = authors.map(&:name)
-    erb :"buying/offer"
-  end
 
   get '/selling/confirm' do
     @condition = session[:condition]
@@ -158,24 +93,39 @@ class Bookstore < Sinatra::Base
     erb :"offers/index"
   end
 
-  def find_book_for_sale(params)
-    if(params[:isbn] != "") then
-      stripped_isbn = params[:isbn].gsub('-','').strip
-      isbn = Lisbn.new(stripped_isbn)
-      book = scrape_and_find(isbn)
-      redirect '/error' if book.nil?
-      confirm_listing(book._id, params[:price], params[:condition])
-    end
-    #TODO -- add support for author and title search
+  get '/offer/make/:post_id' do
+    erb :"buying/offer"
   end
 
-  def confirm_listing(book_id, price, condition)
-    require_authorization(request, session) unless logged_in?(request, session)
-    @user = session[:cas_user]
-    session[:condition] = condition
-    session[:price] = price
-    session[:book_id] = book_id
-    redirect '/selling/confirm'
+  get '/offer/make/asking/:post_id' do
+    #Email post.seller@students.wwu.edu with the offer
+    post = Post.find(params[:post_id])
+    offer = Offer.new({
+                    :seller => post.seller,
+                    :buyer => @user,
+                    :price => post.price,
+                    :post_id => post._id
+                    })
+    post.offers << offer
+    post.save!
+    redirect '/offer/success'
+  end
+
+  get '/offer/success' do
+    erb :"buying/success"
+  end
+
+  get '/offer/:post_id' do
+    @post = Post.find(params[:post_id])
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => session[:book_id]).all
+    @authors = authors.map(&:name)
+    erb :"buying/offer"
+  end
+
+  get '/offer/decline/:post_id' do
+    Offer.destroy(params[:post_id]);
+    redirect '/offers'
   end
 
 end

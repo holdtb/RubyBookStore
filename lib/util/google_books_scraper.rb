@@ -52,5 +52,4 @@ module GoogleBookScraper
     })
   end
 
-  private :add_to_db, :scrape, :find_book_by_isbn
 end
