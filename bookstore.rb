@@ -98,7 +98,7 @@ class Bookstore < Sinatra::Base
   end
 
   get '/offer/make/asking/:post_id' do
-    #Email post.seller@students.wwu.edu with the offer
+    #TODO:Email post.seller@students.wwu.edu with the offer
     post = Post.find(params[:post_id])
     offer = Offer.new({
                     :seller => post.seller,
@@ -124,8 +124,13 @@ class Bookstore < Sinatra::Base
   end
 
   get '/offer/decline/:post_id' do
-    Offer.destroy(params[:post_id]);
+    Offer.destroy(params[:post_id])
+    #TODO:Email buy that their offer was declined
     redirect '/offers'
+  end
+
+  get '/offer/accept/:post_id' do
+    #TODO:Implement this
   end
 
 end
