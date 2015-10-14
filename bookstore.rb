@@ -88,8 +88,13 @@ class Bookstore < Sinatra::Base
     erb :not_found
   end
 
-  get '/offers' do
+  get '/sales' do
     @posts = Post.where(:seller => @user).all
+    erb :"sales/index"
+  end
+
+  get '/offers' do
+    @offers = Offer.where(:buyer => @user).all
     erb :"offers/index"
   end
 
