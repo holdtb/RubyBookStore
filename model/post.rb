@@ -5,7 +5,7 @@ class Post
 
 
   key :seller, String
-  key :price, Float
+  key :price, Integer
   key :condition, String
 
   key :book_id, ObjectId

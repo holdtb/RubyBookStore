@@ -25,7 +25,7 @@
         <li class="nav-divider"></li>
         <li><a href="https://websso.wwu.edu/cas/logout"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
       </ul>
-      <%=defined?(@user) ? @user : "Guest" %>
+      <p style="display:inline;">Logged in as: <span class="username"><%=defined?(@user) ? @user : "Guest" %></span></p>
     </div>
   </div>
 </div>
@@ -63,7 +63,7 @@
             <strong>Isbn: </strong><%= Book.find(post.book_id).isbn %></br>
             <strong>Authors: </strong><%= @authors[i].join(", ") %></br>
             <strong>Condition: </strong><%= post.condition.capitalize! %></br>
-            <strong>Price: </strong>$<%= session[:price] %></br>
+            <strong>Price: </strong>$<%= post.price %></br>
           </p>
           <div class="clearfix"></div>
           <hr>

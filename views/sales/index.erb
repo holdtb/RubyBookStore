@@ -13,7 +13,6 @@
 <div class="navbar navbar-default" id="subnav">
   <div class="col-md-12">
     <div class="navbar-header">
-
       <a href="#" style="margin-left:15px;" class="navbar-btn btn btn-default btn-plus dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-inbox" style="color:#6f5499;"></span> View Sales <small><i class="glyphicon glyphicon-chevron-down"></i></small></a>
       <ul class="nav dropdown-menu">
         <li><a href="/buying"><i class="glyphicon glyphicon-shopping-cart" style="color:#1111dd;"></i> Buying</a></li>
@@ -26,7 +25,7 @@
         <li class="nav-divider"></li>
         <li><a href="https://websso.wwu.edu/cas/logout"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
       </ul>
-      <%=defined?(@user) ? @user : "Guest" %>
+        <p style="display:inline;">Logged in as: <span class="username"><%=defined?(@user) ? @user : "Guest" %></span></p>
     </div>
   </div>
 </div>
