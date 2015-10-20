@@ -51,10 +51,15 @@
              <% prices = post.offers.map(&:price) %>
              <% offer = post.offers.map(&:_id) %>
              <% buyers = post.offers.map(&:buyer) %>
+             <% count = 0 %>
              <% prices.each_with_index do |p, i| %>
-              <a <%= "href='/offer/accept/#{post.offers[i]._id}'"%>><button  class="btn-success">Accept</button></a> $<%= p %> - offered on <%=post.offers[i].created_at %>
-              <a <%= "href='/offer/decline/#{post.offers[i]._id}'"%>><button  class="btn-danger">Decline</button></a></br></br>
+               <% if post.offers[i].active %>
+                <% count = count + 1 %>
+                <a <%= "href='/offer/accept/#{post.offers[i]._id}'"%>><button  class="btn-success">Accept</button></a> $<%= p %> - offered on <%=post.offers[i].created_at %>
+                <a <%= "href='/offer/decline/#{post.offers[i]._id}'"%>><button  class="btn-danger">Decline</button></a></br></br>
+                <% end %>
              <% end %>
+             <%= "<h4>No offers yet</h4>" unless count > 0 %>
            </p>
          </div>
      </div>

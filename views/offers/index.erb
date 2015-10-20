@@ -33,9 +33,32 @@
 <!--main-->
 <div class="container" id="main">
    <div align="center">
+
      <div class="col-md-12">
-     <h1>Your Offers:</h1>
-     <% @offers.each_with_index do |offer, i|%>
+     <%= @accepted_offers.length > 0 ? "<h1>Your Accepted Offers:</h1>" : "" %>
+     <% @accepted_offers.each_with_index do |offer, i|%>
+     <% post = Post.find(offer.post_id) %>
+       <div class="panel panel-primary">
+         <div class="panel-heading">
+           <h3 class="panel-title"><%= Book.find(post.book_id).title %></h3>
+         </div>
+         <div class="panel-body">
+           <p>
+             <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
+             <strong>List Date: </strong><%= post.created_at %></br>
+             <strong>List Price: </strong>$<%= session[:price] %></br>
+             <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
+             <strong>Your offer of <%= offer.price %> was accepted! </strong></br>
+           </p>
+         </div>
+     </div>
+     <% end %>
+   </div>
+
+
+     <div class="col-md-12">
+     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "<h2>You currently have no active offers.</h2>" %>
+     <% @active_offers.each_with_index do |offer, i|%>
      <% post = Post.find(offer.post_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
@@ -53,12 +76,33 @@
              <% offer = post.offers.map(&:_id) %>
              <% buyers = post.offers.map(&:buyer) %>
              <% prices.each_with_index do |p, i| %>
-              $<%= p %> - on <%=post.offers[i].created_at %> [PENDING]
+              $<%= p %> - on <%=post.offers[i].created_at %>
              <% end %>
            </p>
          </div>
      </div>
      <% end %>
    </div>
+
+   <div class="col-md-12">
+   <%= @declined_offers.length > 0 ? "<h1>Your Declined Offers:</h1>" : "" %>
+   <% @declined_offers.each_with_index do |offer, i|%>
+   <% post = Post.find(offer.post_id) %>
+     <div class="panel panel-primary">
+       <div class="panel-heading">
+         <h3 class="panel-title"><%= Book.find(post.book_id).title %></h3>
+       </div>
+       <div class="panel-body">
+         <p>
+           <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
+           <strong>List Date: </strong><%= post.created_at %></br>
+           <strong>List Price: </strong>$<%= session[:price] %></br>
+           <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
+           <strong>Your offer of $<%= offer.price %>.00 was declined.</strong></br>
+         </p>
+       </div>
+   </div>
+   <% end %>
+ </div>
  </div>
 </div>

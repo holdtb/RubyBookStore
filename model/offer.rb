@@ -6,6 +6,8 @@ class Offer
   key :buyer, String, :required => true
   key :seller, String, :required => true
   key :price, Integer, :required => true
+  key :active, Boolean
+  key :accepted, Boolean
 
   belongs_to :post
   timestamps!

@@ -94,7 +94,9 @@ class Bookstore < Sinatra::Base
   end
 
   get '/offers' do
-    @offers = Offer.where(:buyer => @user).all
+    @active_offers = Offer.where(:buyer => @user, :active => true, :accepted => false).all
+    @declined_offers = Offer.where(:buyer => @user, :active => false, :accepted => false).all
+    @accepted_offers = Offer.where(:buyer => @user, :active => false, :accepted => true).all
     erb :"offers/index"
   end
 
@@ -105,12 +107,16 @@ class Bookstore < Sinatra::Base
   get '/offer/make/asking/:post_id' do
     #TODO:Email post.seller@students.wwu.edu with the offer
     post = Post.find(params[:post_id])
-    offer = Offer.new({
+    offer = Offer.create({
                     :seller => post.seller,
                     :buyer => @user,
                     :price => post.price,
+                    :active => true,
+                    :accepted => false,
                     :post_id => post._id
                     })
+
+    offer.save!
     post.offers << offer
     post.save!
     redirect '/offer/success'
@@ -128,13 +134,17 @@ class Bookstore < Sinatra::Base
     erb :"buying/offer"
   end
 
-  get '/offer/decline/:post_id' do
-    Offer.destroy(params[:post_id])
+  get '/offer/decline/:offer_id' do
     #TODO:Email buy that their offer was declined
-    redirect '/offers'
+    offer = Offer.find(params[:offer_id])
+    offer.set(:active => false)
+    offer.set(:accepted => false)
+    offer.reload
+    offer.save!
+    redirect '/sales'
   end
 
-  get '/offer/accept/:post_id' do
+  get '/offer/accept/:offer_id' do
     #TODO:Implement this
   end
 
