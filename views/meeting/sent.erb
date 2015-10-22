@@ -1,0 +1,40 @@
+<%content_for :style do %>
+  <link href="/../css/styles.css" rel="stylesheet">
+<%end%>
+
+<% content_for :nav do %>
+<nav class="navbar navbar-fixed-top header">
+  <div class="col-md-12">
+    <div class="navbar-header">
+      <a href="#" class="navbar-brand">Bookstore Web Site</a>
+    </div>
+  </div>
+</nav>
+<div class="navbar navbar-default" id="subnav">
+  <div class="col-md-12">
+    <div class="navbar-header">
+      <a href="#" style="margin-left:15px;" class="navbar-btn btn btn-default btn-plus dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bullhorn" style="color:#FFD829;"></span> Selling <small><i class="glyphicon glyphicon-chevron-down"></i></small></a>
+      <ul class="nav dropdown-menu">
+        <li><a href="/buying"><i class="glyphicon glyphicon-shopping-cart" style="color:#1111dd;"></i> Buying</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/selling"><i class="glyphicon glyphicon-bullhorn" style="color:#FFD829;"></i> Selling</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/sales"><i class="glyphicon glyphicon-tag" style="color:#6f5499;"></i> View Sales</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/offers"><i class="glyphicon glyphicon-inbox" style="color:#6f5499;"></i> View Offers</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="https://websso.wwu.edu/cas/logout"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
+      </ul>
+      <p style="display:inline;">Logged in as: <span class="username"><%=defined?(@user) ? @user : "Guest" %></span></p>
+    </div>
+  </div>
+</div>
+<%end%>
+<!--main-->
+<div class="container" id="main">
+   <div class="row" align="center">
+     <div class="col-md-6 col-sm-8 col col-sm-offset-3">
+     <h1>Your meeting proposal has been sent to the buyer.</h1>
+   </div>
+ </div>
+</div>

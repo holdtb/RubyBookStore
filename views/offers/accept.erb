@@ -1,0 +1,95 @@
+<%content_for :style do %>
+  <link href="/../css/styles.css" rel="stylesheet">
+  <link href="/../css/jquery.timepicker.css" rel="stylesheet">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<%end%>
+
+<% content_for :nav do %>
+<nav class="navbar navbar-fixed-top header">
+  <div class="col-md-12">
+    <div class="navbar-header">
+      <a href="#" class="navbar-brand">Bookstore Web Site</a>
+    </div>
+  </div>
+</nav>
+<div class="navbar navbar-default" id="subnav">
+  <div class="col-md-12">
+    <div class="navbar-header">
+      <a href="#" style="margin-left:15px;" class="navbar-btn btn btn-default btn-plus dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bullhorn" style="color:#FFD829;"></span> Selling <small><i class="glyphicon glyphicon-chevron-down"></i></small></a>
+      <ul class="nav dropdown-menu">
+        <li><a href="/buying"><i class="glyphicon glyphicon-shopping-cart" style="color:#1111dd;"></i> Buying</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/selling"><i class="glyphicon glyphicon-bullhorn" style="color:#FFD829;"></i> Selling</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/sales"><i class="glyphicon glyphicon-tag" style="color:#6f5499;"></i> View Sales</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="/offers"><i class="glyphicon glyphicon-inbox" style="color:#6f5499;"></i> View Offers</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="https://websso.wwu.edu/cas/logout"><i class="glyphicon glyphicon-exclamation-sign" style="color:#dd1111;"></i> Logout</a></li>
+      </ul>
+      <p style="display:inline;">Logged in as: <span class="username"><%=defined?(@user) ? @user : "Guest" %></span></p>
+    </div>
+  </div>
+</div>
+<%end%>
+<!--main-->
+<div class="container" id="main">
+  <div class="col-sm-10 col-md-8 col-sm-offset-2 col-md-offset-2">
+  <div class="row" align="center">
+    <div class="well well-lg">Please fill in sale details:
+      <% if form.failed? %>
+        <h3 style="color:red;">Errors:</h3>
+        <% if form.failed_on?(:location) %>
+          <p style="color:red;">You must enter a valid location.</p>
+        <% end %>
+        <% if form.failed_on?(:datepicker) %>
+          <p style="color:red;">You must enter a valid date.</p>
+        <% end %>
+        <% if form.failed_on?(:timepicker) %>
+          <p style="color:red;">You must enter a valid time.</p>
+        <% end %>
+      <% end %></div>
+
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><%= @book.title %> by <%= @authors.join(", ") %></h3>
+        </div>
+        <div class="panel-body">
+          <p>
+            <img src="<%=@book.thumbnail%>" class="img-thumbnail pull-left">
+            <strong>Date: </strong><%= Time.now.strftime("%m/%d/%Y %I:%M %p") %></br>
+            <strong>Condition: </strong><%= @post.condition.capitalize %></br>
+            <strong>Price: </strong>$<%= @offer.price %>.00</br>
+          </p>
+          <div class="clearfix"></div>
+          <form action="/meeting/create/<%=@offer._id%>" method="post">
+            Meeting Location: <select name="location" id="location">
+              <option value="" disabled selected>(Select One)</option>
+              <option value="Red Square">Red Square</option>
+              <option value="Communications Facility Foyer">Communications Facility Foyer</option>
+              <option value="Zoe's Bagels/Coffee">Zoe's Bagels/Coffee</option>
+              <option value="Viking Union">Viking Union</option>
+              <option value="Wade King Rec Center">Wade King Rec Center</option>
+            </select></br></br>
+            Date: <input placeholder="MM/DD/YYYY" type="text" id="datepicker" name="datepicker"></br></br>
+            Sale Time: <input placeholder="HH:MM AM/PM" type="text" id="timepicker" name="timepicker" class="time" /></br>
+            <button class="btn btn-default btn-primary" style="margin-top:10px;" type="submit">Confirm</button>
+          </form>
+        </div>
+      </div>
+  </div>
+</div>
+
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="/../js/timepicker/jquery.timepicker.min.js"></script>
+<script>
+$( document ).ready(function() {
+  $('#timepicker').timepicker({ 'minTime': '7:00am',
+                                'maxTime': '10:00pm',
+                                'timeFormat': 'H:i',
+                                'timeFormat':'g:i A'
+                              });
+
+  $('#datepicker').datepicker();
+});
+</script>

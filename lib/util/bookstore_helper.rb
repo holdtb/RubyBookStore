@@ -1,7 +1,7 @@
 module BookstoreHelper
 
   def get_new_posts
-    Post.sort(:created_at.desc).limit(5).all
+    Post.sort(:created_at.desc).limit(4).all
   end
 
   def get_authors(posts)
@@ -16,9 +16,13 @@ module BookstoreHelper
   def get_posts(isbns)
     posts = []
     isbns.each do |isbn|
-      book = Book.where(:isbn => isbn).all.first
-      posts_found = Post.where(:book_id => book._id).all
-      posts.concat posts_found if posts_found.length > 0
+      book = Book.where(:isbn => isbn).all
+      if !book.nil?
+        book = book.first
+      end
+
+      posts_found = Post.where(:book_id => book._id).all if !book.nil?
+      posts.concat posts_found if !posts_found.nil? && posts_found.length > 0
     end
     posts
   end

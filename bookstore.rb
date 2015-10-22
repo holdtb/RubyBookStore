@@ -55,8 +55,6 @@ class Bookstore < Sinatra::Base
     validate_sale
   end
 
-
-
   get '/selling/confirm' do
     @condition = session[:condition]
     @price = session[:price]
@@ -91,6 +89,55 @@ class Bookstore < Sinatra::Base
   get '/sales' do
     @posts = Post.where(:seller => @user).all
     erb :"sales/index"
+  end
+
+  get '/sales/sell/:offer_id' do
+    #TODO: Email buyer
+    offer = Offer.find(params[:offer_id])
+    offer.set(active => false)
+    offer.set(accepted => true)
+    offer.reload
+    offer.save
+    erb :"sales/success"
+  end
+
+  post '/meeting/create/:offer_id' do
+    @offer = Offer.find(params[:offer_id])
+    @post = Post.find(@offer.post_id)
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => @book._id).all
+    @authors = authors.map(&:name)
+    #Validate form
+    form do
+      field :location, :present => true
+      field :datepicker, :present => true, :regexp => %r{^\d{2}\/\d{2}\/\d{4}$}
+      field :timepicker, :present => true
+    end
+
+    if form.failed?
+      output = erb :"offers/accept"
+      fill_in_form(output)
+    else
+      #create meeting
+      meeting = Meeting.create({
+          :seller => @offer.seller,
+          :buyer => @offer.buyer,
+          :accepted => false,
+          :location => params[:location],
+          :date => params[:datepicker],
+          :time => params[:timepicker]
+        })
+        meeting.save!
+
+
+      #TODO:Email both parties
+      #await response
+      erb :"meeting/sent"
+    end
+  end
+
+  get '/meeting/create/error' do
+    erb :"meeting/error"
   end
 
   get '/offers' do
@@ -145,7 +192,12 @@ class Bookstore < Sinatra::Base
   end
 
   get '/offer/accept/:offer_id' do
-    #TODO:Implement this
+    @offer = Offer.find(params[:offer_id])
+    @post = Post.find(@offer.post_id)
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => @book._id).all
+    @authors = authors.map(&:name)
+    erb :"offers/accept"
   end
 
 end
