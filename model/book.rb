@@ -16,4 +16,5 @@ class Book
 
   many :posts
   many :authors
+  many :meetings
 end

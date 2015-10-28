@@ -88,6 +88,14 @@ class Bookstore < Sinatra::Base
 
   get '/sales' do
     @posts = Post.where(:seller => @user).all
+    @meetings = Meeting.where(:seller => @user).all
+    @messages = []
+    @meetings.each do |m|
+      @messages << "Accepted" if m.accepted
+      @messages << "Declined" if !m.accepted && m.declined
+      @messages << "Pending" if !m.accepted && !m.declined
+    end
+    @books = @meetings.map{Book.find(&:book_id)}
     erb :"sales/index"
   end
 
@@ -123,6 +131,9 @@ class Bookstore < Sinatra::Base
           :seller => @offer.seller,
           :buyer => @offer.buyer,
           :accepted => false,
+          :declined => false,
+          :book_id => @book._id,
+          :offer_id => @offer._id,
           :location => params[:location],
           :date => params[:datepicker],
           :time => params[:timepicker]
