@@ -110,3 +110,15 @@ h3,h4,h5 {
 .username{
   color: white;
 }
+.status_msg{
+  font-size: 19px;
+}
+.status_msg.accepted{
+  color:rgb(4, 217, 0);
+}
+.status_msg.declined{
+  color:rgb(224, 0, 0);
+}
+.status_msg.pending{
+  color:rgb(238, 207, 0);
+}

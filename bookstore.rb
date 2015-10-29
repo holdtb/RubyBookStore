@@ -5,6 +5,7 @@ require 'sinatra/content_for'
 require 'sinatra/formkeeper'
 require 'mongo_mapper'
 require 'lisbn'
+require 'chronic'
 Dir.glob('lib/**/*.rb') { |f| require_relative f }
 Dir["./model/*.rb"].each {|file| require file }
 
@@ -88,7 +89,8 @@ class Bookstore < Sinatra::Base
 
   get '/sales' do
     @posts = Post.where(:seller => @user).all
-    @meetings = Meeting.where(:seller => @user).all
+    meetings = Meeting.where(:seller => @user).all
+    @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
     @messages = []
     @meetings.each do |m|
       @messages << "Accepted" if m.accepted
@@ -151,7 +153,33 @@ class Bookstore < Sinatra::Base
     erb :"meeting/error"
   end
 
+  get '/meeting/accept/:meeting_id' do
+    #Email both parties
+    meeting = Meeting.find(params[:meeting_id])
+    meeting.accepted = true
+    meeting.save!
+    redirect '/sales'
+  end
+
+  get '/meeting/decline/:meeting_id' do
+    meeting = Meeting.find(params[:meeting_id])
+    meeting.accepted = false
+    meeting.declined = true
+    meeting.save!
+    redirect '/sales'
+  end
+
   get '/offers' do
+    @posts = Post.where(:seller => @user).all
+    meetings = Meeting.where(:seller => @user).all
+    @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
+    @messages = []
+    @meetings.each do |m|
+      @messages << "Accepted" if m.accepted
+      @messages << "Declined" if !m.accepted && m.declined
+      @messages << "Pending" if !m.accepted && !m.declined
+    end
+    @books = @meetings.map{Book.find(&:book_id)}
     @active_offers = Offer.where(:buyer => @user, :active => true, :accepted => false).all
     @declined_offers = Offer.where(:buyer => @user, :active => false, :accepted => false).all
     @accepted_offers = Offer.where(:buyer => @user, :active => false, :accepted => true).all

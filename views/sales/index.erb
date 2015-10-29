@@ -34,24 +34,22 @@
 <div class="container" id="main">
    <div align="center">
      <div class="col-md-12">
-     <h1>Your Meetings:</h1>
-     <% @meetings.each_with_index do |meeting, i|%>
+     <%= "<h1>Your Meetings:</h1>" if @meetings.length > 0 %>
+      <% @meetings.each_with_index do |meeting, i|%>
       <% book = Book.find(meeting.book_id) %>
       <% offer = Offer.find(meeting.offer_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
-           <h3 class="panel-title"><%= "<b>"+@messages[i]+"</b>" + " Meeting for sale of " + book.title %></h3>
+           <h3 class="panel-title"><%= "Your proposal for the sale of " + book.title %></h3>
          </div>
          <div class="panel-body">
            <p>
              <img src="<%=book.thumbnail%>" class="img-thumbnail pull-left">
+             <strong>Status: </strong> <span class="status_msg <%=@messages[i].downcase! %>"><%=@messages[i].capitalize %></span></br></br></br>
              <strong>Meeting Location: </strong> <%= meeting.location %></br>
              <strong>Meeting Date: </strong> <%= meeting.date %></br>
              <strong>Meeting Time: </strong> <%= meeting.time %></br>
              <strong>Sale price: </strong> $<%= offer.price %>.00</br></br>
-             <a style="padding-right:10px;" <%= "href='/meeting/decline/#{meeting._id}'"%>><button  class="btn-danger">Decline</button></a>
-             <a <%= "href='/meeting/accept/#{meeting._id}'"%>><button  class="btn-success">Agree</button></a></br></br>
-
            </p>
          </div>
      </div>
