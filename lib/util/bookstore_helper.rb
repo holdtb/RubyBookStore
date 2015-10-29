@@ -1,3 +1,4 @@
+require 'pry'
 module BookstoreHelper
 
   def get_new_posts
@@ -62,19 +63,18 @@ module BookstoreHelper
       stripped_isbn = params[:isbn].gsub('-','').strip
       isbn = Lisbn.new(stripped_isbn)
       book = scrape_and_find(isbn)
-      redirect '/error' if book.nil?
-      confirm_listing(book._id, params[:price], params[:condition])
+      return book unless book.nil?
     end
-    #TODO -- add support for author and title search
+    return nil
   end
 
-  def confirm_listing(book_id, price, condition)
+  def confirm_listing(book_id, price, condition, verified)
     require_authorization(request, session) unless logged_in?(request, session)
     @user = session[:cas_user]
     session[:condition] = condition
     session[:price] = price
     session[:book_id] = book_id
-    redirect '/selling/confirm'
+    session[:verified] = verified
   end
 
 end

@@ -53,7 +53,10 @@ class Bookstore < Sinatra::Base
   end
 
   post '/selling' do
-    validate_sale
+    book_for_sale = validate_sale
+    verfied = book_for_sale.verified_book
+    confirm_listing(book_for_sale._id, params[:price], params[:condition], verified)
+    redirect '/selling/confirm'
   end
 
   get '/selling/confirm' do
@@ -61,7 +64,8 @@ class Bookstore < Sinatra::Base
     @price = session[:price]
     @book = Book.find(session[:book_id])
     @authors = Author.where(:book_id => session[:book_id]).all
-
+    @verified = session[:verified]
+    binding.pry
     erb :"selling/confirm"
   end
 
@@ -71,7 +75,8 @@ class Bookstore < Sinatra::Base
                    :book => book,
                    :seller => @user,
                    :price => session[:price],
-                   :condition => session[:condition]
+                   :condition => session[:condition],
+                   :verified_book => session[:verified]
                    )
     book.reload
     post.save!

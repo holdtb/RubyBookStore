@@ -80,7 +80,7 @@
 
 
      <div class="col-md-12">
-     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "<h2>You currently have no active offers.</h2>" %>
+     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "<h2>You haven't made any offers yet.</h2></br><a href='/buying'>Buy Books</a>" %>
      <% @active_offers.each_with_index do |offer, i|%>
      <% post = Post.find(offer.post_id) %>
        <div class="panel panel-primary">

@@ -7,9 +7,11 @@ class Post
   key :seller, String
   key :price, Integer
   key :condition, String
+  key :verified_book, Boolean
 
   key :book_id, ObjectId
   belongs_to :book
   many :offers
   timestamps!
+
 end

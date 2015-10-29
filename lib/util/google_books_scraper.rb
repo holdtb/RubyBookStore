@@ -7,13 +7,14 @@ module GoogleBookScraper
     isbn.isbn13 if isbn.valid?
     book = find_book_by_isbn(isbn)
     if book.nil? then
-      scrape(isbn)
+      scraped_book = scrape(isbn)
+      return nil if scraped_book.nil?
     end
-    book = find_book_by_isbn(isbn)
+    book
   end
 
   def find_book_by_isbn(isbn)
-    return Book.first("isbn" => isbn) if isbn != "" && Book.first("isbn" => isbn)
+    return Book.first("isbn" => isbn) if isbn != "" #&& Book.first("isbn" => isbn)
     return nil
   end
 
@@ -22,8 +23,9 @@ module GoogleBookScraper
       url = "https://www.googleapis.com/books/v1/volumes?q=isbn:#{isbn}"
       response = HTTParty.get(url, :verify => false)
       parsed_response = JSON.parse(response.body)
+      created_book = add_to_db(parsed_response) if parsed_response.keys.length > 0
     end
-    add_to_db(parsed_response)
+    return nil
   end
 
   def add_to_db(json)

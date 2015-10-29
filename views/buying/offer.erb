@@ -36,7 +36,8 @@
   <div class="col-md-6 col-sm-8">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <h3 class="panel-title"><%= Book.find(@post.book_id).title %></h3>
+        <% book = Book.find(@post.book_id) %>
+        <h3 class="panel-title text-center"><%= book.title %></h3>
       </div>
       <div class="panel-body">
         <p>
