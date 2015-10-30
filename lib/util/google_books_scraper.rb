@@ -9,6 +9,7 @@ module GoogleBookScraper
     if book.nil? then
       scraped_book = scrape(isbn)
       return nil if scraped_book.nil?
+      return scraped_book
     end
     book
   end
@@ -23,7 +24,10 @@ module GoogleBookScraper
       url = "https://www.googleapis.com/books/v1/volumes?q=isbn:#{isbn}"
       response = HTTParty.get(url, :verify => false)
       parsed_response = JSON.parse(response.body)
-      created_book = add_to_db(parsed_response) if parsed_response.keys.length > 0
+      if parsed_response.keys.length > 2 then
+        created_book = add_to_db(parsed_response)
+        return created_book
+      end
     end
     return nil
   end

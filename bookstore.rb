@@ -54,8 +54,18 @@ class Bookstore < Sinatra::Base
 
   post '/selling' do
     book_for_sale = validate_sale
-    verfied = book_for_sale.verified_book
-    confirm_listing(book_for_sale._id, params[:price], params[:condition], verified)
+    if !book_for_sale.nil? then
+      confirm_post(book_for_sale._id, params[:price], params[:condition], true)
+    else
+      authors = [] << params[:author]
+      unverified_book = Book.create({
+          :title => params[:title],
+          :isbn => params[:isbn],
+          :authors => authors.map{|a| Author.new(:name => a)}
+      })
+      confirm_post(unverified_book._id, params[:price], params[:condition], false)
+    end
+    binding.pry
     redirect '/selling/confirm'
   end
 
@@ -65,7 +75,6 @@ class Bookstore < Sinatra::Base
     @book = Book.find(session[:book_id])
     @authors = Author.where(:book_id => session[:book_id]).all
     @verified = session[:verified]
-    binding.pry
     erb :"selling/confirm"
   end
 

@@ -68,7 +68,7 @@ module BookstoreHelper
     return nil
   end
 
-  def confirm_listing(book_id, price, condition, verified)
+  def confirm_post(book_id, price, condition, verified)
     require_authorization(request, session) unless logged_in?(request, session)
     @user = session[:cas_user]
     session[:condition] = condition
