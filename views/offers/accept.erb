@@ -62,7 +62,7 @@
             <strong>Price: </strong>$<%= @offer.price %>.00</br>
           </p>
           <div class="clearfix"></div>
-          <form action="/meeting/create/<%=@offer._id%>" method="post">
+          <form action="/meeting/create/<%=@offer.id%>" method="post">
             Meeting Location: <select name="location" id="location">
               <option value="" disabled selected>(Select One)</option>
               <option value="Red Square">Red Square</option>

@@ -1,17 +1,15 @@
-require 'mongo_mapper'
 class Post
-  include MongoMapper::Document
-  set_collection_name "posts"
+  include DataMapper::Resource
 
+  property :id, Serial
+  property :seller, String
+  property :price, Integer
+  property :condition, String
+  property :verified_book, Boolean
+  property :created_at , DateTime
 
-  key :seller, String
-  key :price, Integer
-  key :condition, String
-  key :verified_book, Boolean
+  property :book_id, Integer
 
-  key :book_id, ObjectId
   belongs_to :book
-  many :offers
-  timestamps!
-
+  has n, :offers
 end

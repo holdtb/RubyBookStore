@@ -1,20 +1,21 @@
-require 'mongo_mapper'
-
 class Book
-  include MongoMapper::Document
-  set_collection_name "books"
+  include DataMapper::Resource
 
-  key :title, String, :required => true
-  key :isbn, String, :required => true
-  key :publisher, String
-  key :year, String
-  key :edition, String
-  key :description, String
-  key :pages, Integer
-  key :avgRating, Float
-  key :thumbnail, String
+  property :id, Serial
+  property :title, String, :required => true
+  property :isbn, String, :required => true
+  property :publisher, String
+  property :year, String
+  property :edition, String
+  property :description, Text
+  property :pages, Integer
+  property :avgRating, Float
+  property :thumbnail, Text
+  property :created_at , DateTime
 
-  many :posts
-  many :authors
-  many :meetings
+  #In the database,
+  # this adds a post_id property to a post table.
+  has n, :posts
+  has n, :authors
+  has n, :meetings
 end

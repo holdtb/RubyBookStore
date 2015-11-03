@@ -1,9 +1,9 @@
-require 'mongo_mapper'
 class Author
-  include MongoMapper::Document
-  set_collection_name "authors"
+  include DataMapper::Resource
 
-  key :name, String, :required => true
+  property :id, Serial
+  property :name, String, :required => true
+  property :created_at , DateTime
+
   belongs_to :book
-
 end

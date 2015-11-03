@@ -1,17 +1,17 @@
-require 'mongo_mapper'
 class Meeting
-  include MongoMapper::Document
-  set_collection_name "meetings"
+  include DataMapper::Resource
 
-  key :seller, String
-  key :buyer, String
-  key :accepted, Boolean
-  key :declined, Boolean
-  key :location, String
-  key :date, String
-  key :time, String
-  key :offer_id, ObjectId
-  key :book_id, ObjectId
+  property :id, Serial
+  property :seller, String
+  property :buyer, String
+  property :accepted, Boolean
+  property :declined, Boolean
+  property :location, String
+  property :date, String
+  property :time, String
 
-  timestamps!
+  property :created_at , DateTime
+  property :offer_id, Integer
+  property :book_id, Integer
+
 end

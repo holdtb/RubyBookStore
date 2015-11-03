@@ -43,7 +43,7 @@
         <div class="panel-body">
           <p>
             <% if !@book.thumbnail.nil? then %>
-              <img src="<%= book.thumbnail%>" class="img-thumbnail pull-right">
+              <img src="<%= @book.thumbnail%>" class="img-thumbnail pull-right">
             <%else %>
               <img src="/images/no_image_available.jpg" class="img-thumbnail pull-right">
             <% end %>
