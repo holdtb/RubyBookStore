@@ -10,7 +10,7 @@ Dir.glob('lib/**/*.rb') { |f| require_relative f }
 Dir["./model/*.rb"].each {|file| require file }
 
 class Bookstore < Sinatra::Base
-  set :public_folder, 'public'
+  #set :public_folder, 'public'
   helpers Sinatra::ContentFor
   register Sinatra::Reloader
   register Sinatra::FormKeeper
@@ -58,14 +58,14 @@ class Bookstore < Sinatra::Base
       confirm_post(book_for_sale._id, params[:price], params[:condition], true)
     else
       authors = [] << params[:author]
-      unverified_book = Book.create({
+      unverified_book = Book.new({
           :title => params[:title],
           :isbn => params[:isbn],
           :authors => authors.map{|a| Author.new(:name => a)}
       })
+      unverified_book.save!
       confirm_post(unverified_book._id, params[:price], params[:condition], false)
     end
-    binding.pry
     redirect '/selling/confirm'
   end
 
@@ -200,6 +200,15 @@ class Bookstore < Sinatra::Base
     erb :"offers/index"
   end
 
+  get '/offer/:post_id' do
+    @post = Post.find(params[:post_id])
+    @book = Book.find(@post.book_id)
+    authors = Author.where(:book_id => @book._id).all
+    @authors = authors.map(&:name)
+    @authors = "Unable to find authors for this book." unless @authors.length > 0
+    erb :"buying/offer"
+  end
+
   get '/offer/make/:post_id' do
     erb :"buying/offer"
   end
@@ -224,14 +233,6 @@ class Bookstore < Sinatra::Base
 
   get '/offer/success' do
     erb :"buying/success"
-  end
-
-  get '/offer/:post_id' do
-    @post = Post.find(params[:post_id])
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => session[:book_id]).all
-    @authors = authors.map(&:name)
-    erb :"buying/offer"
   end
 
   get '/offer/decline/:offer_id' do
