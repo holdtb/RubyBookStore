@@ -43,11 +43,11 @@
         <div class="panel-body">
           <p>
             <% if !@book.thumbnail.nil? then %>
-              <img src="<%= book.thumbnail%>" class="img-thumbnail pull-right">
+              <img src="<%= @book.thumbnail%>" class="img-thumbnail pull-right">
             <%else %>
               <img src="/images/no_image_available.jpg" class="img-thumbnail pull-right">
             <% end %>
-            <strong>Date: </strong><%= Time.now.strftime("%m/%d/%Y %I:%M %p") %></br>
+            <strong>Date: </strong><%= Time.now.strftime('%m/%d/%Y at %l:%M %p') %></br>
             <strong>Seller: </strong><%= @user %></br></br>
 
             <strong>Condition: </strong><%= @condition.capitalize if @condition %></br>

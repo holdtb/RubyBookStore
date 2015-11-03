@@ -50,9 +50,9 @@
   </div>
 
   <div class="row">
-  <%= "<h4>Sorry, no recent posts. Check back soon.</h4>" unless @recent_posts.length > 0 %>
+  <%= "<h4 class='text-center'>Sorry, no recent posts. Check back soon.</h4>" unless @recent_posts.length > 0 %>
     <% @recent_posts.each_with_index do |post, i| %>
-    <% book = Book.find(post.book_id) %>
+    <% book = Book.get(post.book_id) %>
     <div class="col-md-6 col-sm-8">
       <div class="panel panel-primary">
         <div class="panel-heading">
@@ -68,11 +68,11 @@
               <strong>Isbn: </strong><%= book.isbn %></br>
               <strong>Authors: </strong><%= @authors[i].join(", ") %></br>
               <strong>Condition: </strong><%= post.condition.capitalize! %></br>
-              <strong>Price: </strong>$<%= post.price %></br>
+              <strong>Price: </strong>$<%= post.price %>.00</br>
           </p>
           <div class="clearfix"></div>
           <hr>
-          <a href='/offer/<%= "#{post._id}" %>'>Buy Book</a>
+          <a href='/offer/<%= "#{post.id}" %>'>Buy Book</a>
         </div>
       </div>
     </div>

@@ -33,10 +33,13 @@
 <!--main-->
 <div class="container" id="main">
    <div align="center">
+      <% if (@active_offers.length < 1 && @declined_offers.length < 1 && @accepted_offers.length < 1) %>
+         <%= "<h2>You haven't made any offers yet.</h2></br><a href='/buying'>Buy Books</a>" %>
+      <% end %>
      <%= "<h1>Your Meetings:</h1>" if @meetings.length > 0 %>
       <% @meetings.each_with_index do |meeting, i|%>
-      <% book = Book.find(meeting.book_id) %>
-      <% offer = Offer.find(meeting.offer_id) %>
+      <% book = Book.get(meeting.book_id) %>
+      <% offer = Offer.get(meeting.offer_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
            <h3 class="panel-title"><%= "Proposal from seller of " + book.title %></h3>
@@ -50,8 +53,8 @@
              <strong>Meeting Time: </strong> <%= meeting.time %></br>
              <strong>Sale price: </strong> $<%= offer.price %>.00</br></br>
              <% if @messages[i].downcase == "pending" then %>
-              <a style="padding-right:10px;" <%= "href='/meeting/decline/#{meeting._id}'"%>><button  class="btn-danger">Decline</button></a>
-              <a <%= "href='/meeting/accept/#{meeting._id}'"%>><button  class="btn-success">Agree</button></a></br></br>
+              <a style="padding-right:10px;" <%= "href='/meeting/decline/#{meeting.id}'"%>><button  class="btn-danger">Decline</button></a>
+              <a <%= "href='/meeting/accept/#{meeting.id}'"%>><button  class="btn-success">Agree</button></a></br></br>
              <% end %>
            </p>
          </div>
@@ -60,14 +63,15 @@
      <div class="col-md-12">
      <%= @accepted_offers.length > 0 ? "<h1>Your Accepted Offers:</h1>" : "" %>
      <% @accepted_offers.each_with_index do |offer, i|%>
-     <% post = Post.find(offer.post_id) %>
+     <% post = Post.get(offer.post_id) %>
+     <% book = Book.get(post.book_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
-           <h3 class="panel-title"><%= Book.find(post.book_id).title %></h3>
+           <h3 class="panel-title"><%= book.title %></h3>
          </div>
          <div class="panel-body">
            <p>
-             <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
+             <img src="<%= book.thumbnail%>" class="img-thumbnail pull-left">
              <strong>List Date: </strong><%= post.created_at %></br>
              <strong>List Price: </strong>$<%= session[:price] %></br>
              <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
@@ -78,28 +82,28 @@
      <% end %>
    </div>
 
-
      <div class="col-md-12">
-     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "<h2>You haven't made any offers yet.</h2></br><a href='/buying'>Buy Books</a>" %>
+     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "" %>
      <% @active_offers.each_with_index do |offer, i|%>
-     <% post = Post.find(offer.post_id) %>
+     <% post = Post.get(offer.post_id) %>
+     <% book = Book.get(post.book_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
-           <h3 class="panel-title"><%= Book.find(post.book_id).title %></h3>
+           <h3 class="panel-title"><%= book.title %></h3>
          </div>
          <div class="panel-body">
            <p>
-             <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
-             <strong>List Date: </strong><%= post.created_at %></br>
-             <strong>List Price: </strong>$<%= session[:price] %></br>
+             <img src="<%=book.thumbnail%>" class="img-thumbnail pull-left">
+             <strong>List Date: </strong><%= post.created_at.strftime('%m/%d/%Y at %l:%M %p') %></br>
+             <strong>List Price: </strong>$<%= post.price %>.00</br>
              <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
              <strong>Your Offer: </strong></br>
              <%= "<h4>No offers yet</h4>" if post.offers.length < 1 %>
              <% prices = post.offers.map(&:price) %>
-             <% offer = post.offers.map(&:_id) %>
+             <% offer = post.offers.map(&:id) %>
              <% buyers = post.offers.map(&:buyer) %>
              <% prices.each_with_index do |p, i| %>
-              $<%= p %> - on <%=post.offers[i].created_at %>
+              $<%= p %> - on <%= post.offers[i].created_at.strftime('%m/%d/%Y at %l:%M %p') %></br>
              <% end %>
            </p>
          </div>
@@ -110,16 +114,17 @@
    <div class="col-md-12">
    <%= @declined_offers.length > 0 ? "<h1>Your Declined Offers:</h1>" : "" %>
    <% @declined_offers.each_with_index do |offer, i|%>
-   <% post = Post.find(offer.post_id) %>
+   <% post = Post.get(offer.post_id) %>
+   <% book = Book.get(post.book_id) %>
      <div class="panel panel-primary">
        <div class="panel-heading">
-         <h3 class="panel-title"><%= Book.find(post.book_id).title %></h3>
+         <h3 class="panel-title"><%= book.title %></h3>
        </div>
        <div class="panel-body">
          <p>
-           <img src="<%=Book.find(post.book_id).thumbnail%>" class="img-thumbnail pull-left">
-           <strong>List Date: </strong><%= post.created_at %></br>
-           <strong>List Price: </strong>$<%= session[:price] %></br>
+           <img src="<%= book.thumbnail%>" class="img-thumbnail pull-left">
+           <strong>List Date: </strong><%= post.created_at.strftime('%m/%d/%Y at %l:%M %p') %></br>
+           <strong>List Price: </strong>$<%= post.price %>.00</br>
            <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
            <strong>Your offer of $<%= offer.price %>.00 was declined.</strong></br>
          </p>

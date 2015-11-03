@@ -1,14 +1,13 @@
-require 'mongo_mapper'
 class Offer
-  include MongoMapper::Document
-  set_collection_name "offers"
+  include DataMapper::Resource
 
-  key :buyer, String, :required => true
-  key :seller, String, :required => true
-  key :price, Integer, :required => true
-  key :active, Boolean
-  key :accepted, Boolean
+  property :id, Serial
+  property :buyer, String, :required => true
+  property :seller, String, :required => true
+  property :price, Integer, :required => true
+  property :active, Boolean
+  property :accepted, Boolean
+  property :created_at , DateTime
 
   belongs_to :post
-  timestamps!
 end

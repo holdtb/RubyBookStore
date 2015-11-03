@@ -2,13 +2,15 @@ require 'pry'
 module BookstoreHelper
 
   def get_new_posts
-    Post.sort(:created_at.desc).limit(4).all
+    #Post.sort(:created_at.desc).limit(4).all
+    Post.all(:limit => 4, :order => [:created_at.desc])
   end
 
   def get_authors(posts)
     authors = []
     posts.each do |post|
-      authors_found = Author.where(:book_id => post.book_id).fields(:name).all
+      #authors_found = Author.where(:book_id => post.book_id).fields(:name).all
+      authors_found = Author.all(:book_id => post.book_id)
       authors << authors_found.map(&:name)
     end
     authors
@@ -17,12 +19,14 @@ module BookstoreHelper
   def get_posts(isbns)
     posts = []
     isbns.each do |isbn|
-      book = Book.where(:isbn => isbn).all
+      #book = Book.where(:isbn => isbn).all
+      book = Book.all(:isbn => isbn)
       if !book.nil?
         book = book.first
       end
 
-      posts_found = Post.where(:book_id => book._id).all if !book.nil?
+      #posts_found = Post.where(:book_id => book._id).all if !book.nil?
+      posts_found = Post.all(:book_id => book.id) if !book.nil?
       posts.concat posts_found if !posts_found.nil? && posts_found.length > 0
     end
     posts
@@ -37,7 +41,8 @@ module BookstoreHelper
       book_isbns << isbn if isbn
     end
 
-    book = Book.where(:title => /#{Regexp.escape(params[:title])}/i).all if params[:title] != ""
+    #book = Book.where(:title => /#{Regexp.escape(params[:title])}/i).all if params[:title] != ""
+    book = Book.all(:title => /#{Regexp.escape(params[:title])}/i) if params[:title] != ""
     book_isbns.concat book.map(&:isbn) if book && book.length > 0
     book_isbns
   end

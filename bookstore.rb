@@ -3,14 +3,16 @@ require 'sinatra/base'
 require 'sinatra/reloader'
 require 'sinatra/content_for'
 require 'sinatra/formkeeper'
-require 'mongo_mapper'
+require 'data_mapper'
+require 'dm-sqlite-adapter'
+require 'sqlite3'
 require 'lisbn'
 require 'chronic'
 Dir.glob('lib/**/*.rb') { |f| require_relative f }
 Dir["./model/*.rb"].each {|file| require file }
+DataMapper.setup :default, "sqlite3://#{Dir.pwd}/database.db"
 
 class Bookstore < Sinatra::Base
-  #set :public_folder, 'public'
   helpers Sinatra::ContentFor
   register Sinatra::Reloader
   register Sinatra::FormKeeper
@@ -20,9 +22,11 @@ class Bookstore < Sinatra::Base
   helpers BookstoreHelper
 
   configure do
-    MongoMapper.connection = Mongo::Connection.new("localhost", 27017)
-    MongoMapper.database = "bookstore"
+    #MongoMapper.connection = Mongo::Connection.new("localhost", 27017)
+    #MongoMapper.database = "bookstore"
   end
+
+  DataMapper.finalize.auto_upgrade!
 
   before do
     process_cas_login(request, session)
@@ -55,16 +59,16 @@ class Bookstore < Sinatra::Base
   post '/selling' do
     book_for_sale = validate_sale
     if !book_for_sale.nil? then
-      confirm_post(book_for_sale._id, params[:price], params[:condition], true)
+      confirm_post(book_for_sale.id, params[:price], params[:condition], true)
     else
       authors = [] << params[:author]
-      unverified_book = Book.new({
+      unverified_book = Book.create(
           :title => params[:title],
           :isbn => params[:isbn],
-          :authors => authors.map{|a| Author.new(:name => a)}
-      })
-      unverified_book.save!
-      confirm_post(unverified_book._id, params[:price], params[:condition], false)
+          :authors => authors.map{|a| Author.create(:name => a)}
+      )
+      binding.pry
+      confirm_post(unverified_book.id, params[:price], params[:condition], false)
     end
     redirect '/selling/confirm'
   end
@@ -72,24 +76,22 @@ class Bookstore < Sinatra::Base
   get '/selling/confirm' do
     @condition = session[:condition]
     @price = session[:price]
-    @book = Book.find(session[:book_id])
-    @authors = Author.where(:book_id => session[:book_id]).all
+    @book = Book.get(session[:book_id])
+    @authors = Author.all(:book_id => session[:book_id])
     @verified = session[:verified]
     erb :"selling/confirm"
   end
 
   get '/selling/sell' do
-    book = Book.find(session[:book_id])
-    post = Post.new(
-                   :book => book,
+    book = Book.get(session[:book_id])
+    post = Post.create(
+                   :book_id => book.id,
                    :seller => @user,
                    :price => session[:price],
                    :condition => session[:condition],
                    :verified_book => session[:verified]
                    )
-    book.reload
-    post.save!
-    book.reload
+
     redirect '/selling/success'
   end
 
@@ -102,8 +104,8 @@ class Bookstore < Sinatra::Base
   end
 
   get '/sales' do
-    @posts = Post.where(:seller => @user).all
-    meetings = Meeting.where(:seller => @user).all
+    @posts = Post.all(:seller => @user)
+    meetings = Meeting.all(:seller => @user)
     @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
     @messages = []
     @meetings.each do |m|
@@ -111,25 +113,23 @@ class Bookstore < Sinatra::Base
       @messages << "Declined" if !m.accepted && m.declined
       @messages << "Pending" if !m.accepted && !m.declined
     end
-    @books = @meetings.map{Book.find(&:book_id)}
+    @books = @meetings.map{|m| Book.get(m.book_id)}
     erb :"sales/index"
   end
 
   get '/sales/sell/:offer_id' do
     #TODO: Email buyer
-    offer = Offer.find(params[:offer_id])
-    offer.set(active => false)
-    offer.set(accepted => true)
-    offer.reload
-    offer.save
+    offer = Offer.get(params[:offer_id])
+    offer.update(:active => false)
+    offer.update(:accepted => true)
     erb :"sales/success"
   end
 
   post '/meeting/create/:offer_id' do
-    @offer = Offer.find(params[:offer_id])
-    @post = Post.find(@offer.post_id)
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => @book._id).all
+    @offer = Offer.get(params[:offer_id])
+    @post = Post.get(@offer.post_id)
+    @book = Book.get(@post.book_id)
+    authors = Author.all(:book_id => @book.id)
     @authors = authors.map(&:name)
     #Validate form
     form do
@@ -142,23 +142,20 @@ class Bookstore < Sinatra::Base
       output = erb :"offers/accept"
       fill_in_form(output)
     else
-      #create meeting
-      meeting = Meeting.create({
+      meeting = Meeting.create(
           :seller => @offer.seller,
           :buyer => @offer.buyer,
           :accepted => false,
           :declined => false,
-          :book_id => @book._id,
-          :offer_id => @offer._id,
+          :book_id => @book.id,
+          :offer_id => @offer.id,
           :location => params[:location],
           :date => params[:datepicker],
           :time => params[:timepicker]
-        })
-        meeting.save!
-
+        )
 
       #TODO:Email both parties
-      #await response
+
       erb :"meeting/sent"
     end
   end
@@ -169,23 +166,25 @@ class Bookstore < Sinatra::Base
 
   get '/meeting/accept/:meeting_id' do
     #Email both parties
-    meeting = Meeting.find(params[:meeting_id])
-    meeting.accepted = true
-    meeting.save!
+    meeting = Meeting.get(params[:meeting_id])
+    meeting.update(:accepted => true)
     redirect '/sales'
   end
 
   get '/meeting/decline/:meeting_id' do
-    meeting = Meeting.find(params[:meeting_id])
-    meeting.accepted = false
-    meeting.declined = true
-    meeting.save!
+    meeting = Meeting.get(params[:meeting_id])
+    meeting.update(:accepted => false)
+    meeting.update(:declined => false)
     redirect '/sales'
   end
 
+  get '/offer/success' do
+    erb :"buying/success"
+  end
+
   get '/offers' do
-    @posts = Post.where(:seller => @user).all
-    meetings = Meeting.where(:seller => @user).all
+    @posts = Post.all(:seller => @user)
+    meetings = Meeting.all(:seller => @user)
     @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
     @messages = []
     @meetings.each do |m|
@@ -193,63 +192,58 @@ class Bookstore < Sinatra::Base
       @messages << "Declined" if !m.accepted && m.declined
       @messages << "Pending" if !m.accepted && !m.declined
     end
-    @books = @meetings.map{Book.find(&:book_id)}
-    @active_offers = Offer.where(:buyer => @user, :active => true, :accepted => false).all
-    @declined_offers = Offer.where(:buyer => @user, :active => false, :accepted => false).all
-    @accepted_offers = Offer.where(:buyer => @user, :active => false, :accepted => true).all
+    @books = @meetings.map{|m| Book.get(m.book_id)}
+    @active_offers = Offer.all(:buyer => @user, :active => true, :accepted => false)
+    @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false)
+    @accepted_offers = Offer.all(:buyer => @user, :active => false, :accepted => true)
     erb :"offers/index"
   end
 
   get '/offer/:post_id' do
-    @post = Post.find(params[:post_id])
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => @book._id).all
+    @post = Post.get(params[:post_id])
+    @book = Book.get(@post.book_id)
+    authors = Author.all(:book_id => @book.id)
     @authors = authors.map(&:name)
     @authors = "Unable to find authors for this book." unless @authors.length > 0
     erb :"buying/offer"
+  end
+
+  get '/offer/make/asking/:post_id' do
+    #TODO:Email post.seller@students.wwu.edu with the offer
+    post = Post.get(params[:post_id])
+    offer = Offer.create(
+                    :seller => post.seller,
+                    :buyer => @user,
+                    :price => post.price,
+                    :active => true,
+                    :accepted => false,
+                    :post_id => post.id
+                    )
+
+    post.offers << offer
+    post.save!
+    redirect '/offer/success'
   end
 
   get '/offer/make/:post_id' do
     erb :"buying/offer"
   end
 
-  get '/offer/make/asking/:post_id' do
-    #TODO:Email post.seller@students.wwu.edu with the offer
-    post = Post.find(params[:post_id])
-    offer = Offer.create({
-                    :seller => post.seller,
-                    :buyer => @user,
-                    :price => post.price,
-                    :active => true,
-                    :accepted => false,
-                    :post_id => post._id
-                    })
 
-    offer.save!
-    post.offers << offer
-    post.save!
-    redirect '/offer/success'
-  end
-
-  get '/offer/success' do
-    erb :"buying/success"
-  end
 
   get '/offer/decline/:offer_id' do
     #TODO:Email buy that their offer was declined
-    offer = Offer.find(params[:offer_id])
-    offer.set(:active => false)
-    offer.set(:accepted => false)
-    offer.reload
-    offer.save!
+    offer = Offer.get(params[:offer_id])
+    offer.update(:active => false)
+    offer.update(:accepted => false)
     redirect '/sales'
   end
 
   get '/offer/accept/:offer_id' do
-    @offer = Offer.find(params[:offer_id])
-    @post = Post.find(@offer.post_id)
-    @book = Book.find(@post.book_id)
-    authors = Author.where(:book_id => @book._id).all
+    @offer = Offer.get(params[:offer_id])
+    @post = Post.get(@offer.post_id)
+    @book = Book.get(@post.book_id)
+    authors = Author.all(:book_id => @book.id)
     @authors = authors.map(&:name)
     erb :"offers/accept"
   end
