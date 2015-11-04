@@ -113,7 +113,11 @@ class Bookstore < Sinatra::Base
       @messages << "Declined" if !m.accepted && m.declined
       @messages << "Pending" if !m.accepted && !m.declined
     end
+<<<<<<< HEAD
     @books = @meetings.map{|m| Book.get(m.book_id)}
+=======
+    @books = @meetings.map{Book.get(&:book_id)}
+>>>>>>> 437543a36c3ca8d16e38610d08027093b2aefb71
     erb :"sales/index"
   end
 
@@ -192,7 +196,11 @@ class Bookstore < Sinatra::Base
       @messages << "Declined" if !m.accepted && m.declined
       @messages << "Pending" if !m.accepted && !m.declined
     end
+<<<<<<< HEAD
     @books = @meetings.map{|m| Book.get(m.book_id)}
+=======
+    @books = @meetings.map{Book.get(&:book_id)}
+>>>>>>> 437543a36c3ca8d16e38610d08027093b2aefb71
     @active_offers = Offer.all(:buyer => @user, :active => true, :accepted => false)
     @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false)
     @accepted_offers = Offer.all(:buyer => @user, :active => false, :accepted => true)

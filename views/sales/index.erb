@@ -81,11 +81,17 @@
              <% prices.each_with_index do |p, i| %>
                <% if post.offers[i].active %>
                 <% count = count + 1 %>
+<<<<<<< HEAD
                 <p>
                   <a <%= "href='/offer/decline/#{post.offers[i].id}'"%>><button  class="btn-danger">Decline</button>
                   </a> <strong>$<%= p %>.00</strong> - offered on <%= post.offers[i].created_at.strftime('%m/%d/%Y') %>
                   <a <%= "href='/offer/accept/#{post.offers[i].id}'"%>><button  class="btn-success">Accept</button></a></br>
                 </p>
+=======
+                <a <%= "href='/offer/decline/#{post.offers[i].id}'"%>><button  class="btn-danger">Decline</button></a> $<%= p %> - offered on <%=post.offers[i].created_at %>
+                <a <%= "href='/offer/accept/#{post.offers[i].id}'"%>><button  class="btn-success">Accept</button></a></br>
+
+>>>>>>> 437543a36c3ca8d16e38610d08027093b2aefb71
               <% end %>
              <% end %>
              <%= "No offers yet" unless count > 0 %>
