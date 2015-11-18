@@ -82,4 +82,105 @@ module BookstoreHelper
     session[:verified] = verified
   end
 
+####SELLING#####
+
+  def create_post(book_id) #/selling/SELLING
+    book = Book.get(book_id)
+    post = Post.create(
+                   :book_id => book.id,
+                   :seller => @user,
+                   :price => session[:price],
+                   :condition => session[:condition],
+                   :verified_book => session[:verified]
+                   )
+  end
+
+
+  ####################Offer#############################
+
+  def view_post(post_id) #/offer/:post_id
+    @post = Post.get(post_id)
+    @book = Book.get(@post.book_id)
+    authors = Author.all(:book_id => @book.id)
+    @authors = authors.map(&:name)
+    @authors = "Unable to find authors for this book." unless @authors.length > 0
+  end
+
+  def create_offer_asking_price(post_id) #/offer/make/asking/:post_id
+    #TODO:Email post.seller@students.wwu.edu with the offer
+    post = Post.get(post_id)
+    offer = Offer.create(
+                    :seller => post.seller,
+                    :buyer => @user,
+                    :price => post.price,
+                    :active => true,
+                    :accepted => false,
+                    :post_id => post.id
+                    )
+
+    post.offers << offer
+    post.save!
+  end
+
+  def decline_offer(offer_id) #/offer/decline/:offer_id
+    #TODO:Email buy that their offer was declined
+    offer = Offer.get(offer_id)
+    offer.update(:active => false)
+    offer.update(:accepted => false)
+  end
+
+  def accept_offer(params) #/offer/accept/:offer_id
+    @offer = Offer.get(params[:offer_id])
+    @post = Post.get(@offer.post_id)
+    @book = Book.get(@post.book_id)
+    authors = Author.all(:book_id => @book.id)
+    @authors = authors.map(&:name)
+  end
+
+  #####################################################
+
+  ##################Meetings############################
+
+  def decline_meeting(meeting_id)
+    #TODO:Email both parties
+    meeting = Meeting.get(meeting_id)
+    meeting.update(:accepted => false)
+    meeting.update(:declined => false)
+  end
+
+  def accept_meeting(meeting_id)
+    #TODO:Email both parties
+    meeting = Meeting.get(params[:meeting_id])
+    meeting.update(:accepted => true)
+  end
+
+  def create_meeting(offer, book, params)
+    meeting = Meeting.create(
+        :seller => offer.seller,
+        :buyer => offer.buyer,
+        :accepted => false,
+        :declined => false,
+        :book_id => book.id,
+        :offer_id => offer.id,
+        :location => params[:location],
+        :date => params[:datepicker],
+        :time => params[:timepicker]
+      )
+
+    #TODO:Email both parties
+  end
+  #######################################################
+
+
+#################SALES#######################
+
+def sell(offer_id)
+  #TODO: Email buyer
+  offer = Offer.get(params[:offer_id])
+  offer.update(:active => false)
+  offer.update(:accepted => true)
+end
+
+#######
+
 end
