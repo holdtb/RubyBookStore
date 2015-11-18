@@ -41,8 +41,7 @@ module BookstoreHelper
       book_isbns << isbn if isbn
     end
 
-    #book = Book.where(:title => /#{Regexp.escape(params[:title])}/i).all if params[:title] != ""
-    book = Book.all(:title => /#{Regexp.escape(params[:title])}/i) if params[:title] != ""
+    book = Book.all(:title.like => params[:title]+"%") if params[:title] != ""
     book_isbns.concat book.map(&:isbn) if book && book.length > 0
     book_isbns
   end
@@ -57,7 +56,8 @@ module BookstoreHelper
 
     if form.failed?
       output = erb :"selling/index"
-      fill_in_form(output)
+      result = fill_in_form(output)
+      return [result]
     else
       book_for_sale = find_book_for_sale(params)
     end

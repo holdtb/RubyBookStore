@@ -36,7 +36,7 @@
   <div class="row text-center">
       <h1>Search Results: </h1>
     <% @posts.each_with_index do |post, i| %>
-      <% book = Book.find(post.book_id) %>
+      <% book = Book.get(post.book_id) %>
     <div class="col-md-6 col-sm-8">
       <div class="panel panel-primary">
         <div class="panel-heading">
@@ -49,14 +49,14 @@
             <%else %>
               <img src="/images/no_image_available.jpg" class="img-thumbnail pull-right">
             <% end %>
-            <strong>Isbn: </strong><%= Book.find(post.book_id).isbn %></br>
+            <strong>Isbn: </strong><%= book.isbn %></br>
             <strong>Authors: </strong><%= @authors[i].join(", ") %></br>
             <strong>Condition: </strong><%= post.condition.capitalize! %></br>
             <strong>Price: </strong>$<%= session[:price] %></br>
           </p>
           <div class="clearfix"></div>
           <hr>
-          <a href='/offer/<%= "#{post._id}" %>'>Buy Book</a>
+          <a href='/offer/<%= "#{post.id}" %>'>Buy Book</a>
         </div>
       </div>
     </div>
