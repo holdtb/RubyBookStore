@@ -10,4 +10,5 @@ class Offer
   property :created_at , DateTime
 
   belongs_to :post
+  belongs_to :meeting, :required => false
 end

@@ -118,15 +118,21 @@ module BookstoreHelper
                     :post_id => post.id
                     )
 
+    offer.save
     post.offers << offer
-    post.save!
+    post.save
   end
 
   def decline_offer(offer_id) #/offer/decline/:offer_id
     #TODO:Email buy that their offer was declined
+
     offer = Offer.get(offer_id)
-    offer.update(:active => false)
-    offer.update(:accepted => false)
+    offer.active = false
+    offer.accepted = false
+    offer.save
+    post = Post.get(offer.post_id)
+    post.offers.delete(offer)
+    post.offers.save
   end
 
   def accept_offer(params) #/offer/accept/:offer_id
@@ -166,6 +172,8 @@ module BookstoreHelper
         :date => params[:datepicker],
         :time => params[:timepicker]
       )
+      meeting.offer = offer
+      meeting.save
 
     #TODO:Email both parties
   end

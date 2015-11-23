@@ -14,4 +14,6 @@ class Meeting
   property :offer_id, Integer
   property :book_id, Integer
 
+  has 1, :offer
+
 end

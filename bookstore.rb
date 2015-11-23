@@ -53,7 +53,7 @@ class Bookstore < Sinatra::Base
 
   post '/selling' do
     book_for_sale = validate_sale
-    binding.pry
+    #binding.pry
     if book_for_sale.class == Array then
       return book_for_sale.first
     elsif !book_for_sale.nil? then
@@ -65,7 +65,7 @@ class Bookstore < Sinatra::Base
           :isbn => params[:isbn],
           :authors => authors.map{|a| Author.create(:name => a)}
       )
-      binding.pry
+    #  binding.pry
       confirm_post(unverified_book.id, params[:price], params[:condition], false)
     end
     redirect '/selling/confirm'
@@ -94,7 +94,6 @@ class Bookstore < Sinatra::Base
   end
 
   get '/sales' do
-    @posts = Post.all(:seller => @user)
     meetings = Meeting.all(:seller => @user)
     @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
     @messages = []
@@ -103,7 +102,7 @@ class Bookstore < Sinatra::Base
       @messages << "Declined" if !m.accepted && m.declined
       @messages << "Pending" if !m.accepted && !m.declined
     end
-
+    @posts = Post.all(:seller => @user)
     @books = @meetings.map{|m| Book.get(m.book_id)}
 
     erb :"sales/index"
@@ -155,7 +154,6 @@ class Bookstore < Sinatra::Base
   end
 
   get '/offers' do
-    @posts = Post.all(:seller => @user)
     meetings = Meeting.all(:seller => @user)
     @meetings = meetings.select{|m| Chronic.parse(m.date) > Date.today-5}
     @messages = []
@@ -168,6 +166,13 @@ class Bookstore < Sinatra::Base
     @books = @meetings.map{|m| Book.get(m.book_id)}
 
     @active_offers = Offer.all(:buyer => @user, :active => true, :accepted => false)
+
+    @count = 0
+    @active_offers.each do |ao|
+      post = Post.get(ao.post_id)
+      @count = @count + 1 if post.offers.select{|o| o.active && !o.meeting_id.nil?}.length > 0
+    end
+
     @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false)
     @accepted_offers = Offer.all(:buyer => @user, :active => false, :accepted => true)
     erb :"offers/index"

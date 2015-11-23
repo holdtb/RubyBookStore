@@ -83,10 +83,11 @@
    </div>
 
      <div class="col-md-12">
-     <%= @active_offers.length > 0 ? "<h1>Your Active Offers:</h1>" : "" %>
+     <%= (@count - @meetings.length > 0 && @active_offers.length > 0) ? "<h1>Your Active Offers:</h1>" : "" %>
      <% @active_offers.each_with_index do |offer, i|%>
      <% post = Post.get(offer.post_id) %>
      <% book = Book.get(post.book_id) %>
+     <% if  post.offers.select{|o| o.active && o.meeting_id.nil?}.length > 0 then %>
        <div class="panel panel-primary">
          <div class="panel-heading">
            <h3 class="panel-title"><%= book.title %></h3>
@@ -99,7 +100,7 @@
              <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
              <strong>Your Offer: </strong></br>
              <%= "<h4>No offers yet</h4>" if post.offers.length < 1 %>
-             <% prices = post.offers.map(&:price) %>
+             <% prices = post.offers.select{|o| o.active && o.meeting_id.nil?}.map(&:price) %>
              <% offer = post.offers.map(&:id) %>
              <% buyers = post.offers.map(&:buyer) %>
              <% prices.each_with_index do |p, i| %>
@@ -108,6 +109,7 @@
            </p>
          </div>
      </div>
+     <% end %>
      <% end %>
    </div>
 
