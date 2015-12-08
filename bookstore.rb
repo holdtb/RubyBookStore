@@ -176,11 +176,10 @@ class Bookstore < Sinatra::Base
     @books = @meetings.map{|m| Book.get(m.book_id)}
     @active_offers = Offer.all(:buyer => @user, :active => true, :accepted => false)
 
-    @count = 0
     @active_offers.each do |ao|
-      post = Post.get(ao.post_id)
-      @count = @count + 1 if post.offers.select{|o| o.active && !o.meeting_id.nil?}.length > 0
-
+      @meetings.each do |m|
+        @active_offers.delete_if{m.offer_id == ao.id}
+      end
     end
 
     @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false, :archive => false)

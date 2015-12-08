@@ -83,7 +83,7 @@
    </div>
 
      <div class="col-md-12">
-     <%= (@count - @meetings.length > 0 && @active_offers.length > 0) ? "<h1>Your Active Offers:</h1>" : "" %>
+     <%= (@active_offers.length > 0) ? "<h1>Your Active Offers:</h1>" : "" %>
      <% @active_offers.each_with_index do |offer, i|%>
      <% post = Post.get(offer.post_id) %>
      <% book = Book.get(post.book_id) %>

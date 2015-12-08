@@ -6,7 +6,6 @@ class Book
   property :isbn, String, :required => true
   property :publisher, String
   property :year, String
-  property :edition, String
   property :description, Text
   property :pages, Integer
   property :avgRating, Float

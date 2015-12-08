@@ -1,6 +1,7 @@
 Dir["../../model/*.rb"].each {|file| require file }
 require 'json'
 require 'httparty'
+require 'pry'
 
 module GoogleBookScraper
   def scrape_and_find(isbn)
@@ -44,6 +45,7 @@ module GoogleBookScraper
     avg_rating = volume_info['averageRating']
     thumbnail = volume_info['imageLinks']['thumbnail']
     authors = volume_info['authors']
+    binding.pry
 
     book = Book.create({
       :title => title,
