@@ -53,7 +53,7 @@ class Bookstore < Sinatra::Base
 
   post '/selling' do
     book_for_sale = validate_sale
-    #binding.pry
+
     if book_for_sale.class == Array then
       return book_for_sale.first
     elsif !book_for_sale.nil? then
@@ -65,7 +65,7 @@ class Bookstore < Sinatra::Base
           :isbn => params[:isbn],
           :authors => authors.map{|a| Author.create(:name => a)}
       )
-    #  binding.pry
+
       confirm_post(unverified_book.id, params[:price], params[:condition], false)
     end
     redirect '/selling/confirm'

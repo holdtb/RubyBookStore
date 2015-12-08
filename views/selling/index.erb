@@ -40,7 +40,13 @@
         <% if form.failed? %>
           <h3 style="color:red;">Errors:</h3>
           <% if form.failed_on?(:isbn) %>
-          <p style="color:red;">Isbn is invalid length.</p>
+          <p style="color:red;">Isbn is invalid.</p>
+          <% end %>
+          <% if form.failed_on?(:title) %>
+          <p style="color:red;">You must enter a valid title.</p>
+          <% end %>
+          <% if form.failed_on?(:author) %>
+          <p style="color:red;">You must identify the author.</p>
           <% end %>
           <% if form.failed_on?(:condition) %>
           <p style="color:red;">You must enter a condition.</p>

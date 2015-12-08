@@ -48,8 +48,10 @@ module BookstoreHelper
 
   def validate_sale
     form do
-      field :isbn, :present => true, :length => 10..16
+      field :isbn, :present => true, :regexp => %r{((978[\--– ])?[0-9][0-9\--– ]{10}[\--– ][0-9xX])|((978)?[0-9]{9}[0-9Xx])}
       field :price, :present => true, :int => {:gte => 0}
+      field :title, :present => true, :length => 1..80
+      field :author, :present => true, :length => 1..80
       field :condition, :present => true, :regexp => %r{^.*(perfect|good|fair|poor|very poor).*$}
     end
 
