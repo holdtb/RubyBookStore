@@ -25,7 +25,6 @@ module BookstoreHelper
         book = book.first
       end
 
-      #posts_found = Post.where(:book_id => book._id).all if !book.nil?
       posts_found = Post.all(:book_id => book.id) if !book.nil?
       posts.concat posts_found if !posts_found.nil? && posts_found.length > 0
     end
@@ -150,14 +149,26 @@ module BookstoreHelper
   def decline_meeting(meeting_id)
     #TODO:Email both parties
     meeting = Meeting.get(meeting_id)
-    meeting.update(:accepted => false)
-    meeting.update(:declined => false)
+    meeting.accepted = false
+    meeting.declined = true
+    meeting.save
   end
 
   def accept_meeting(meeting_id)
     #TODO:Email both parties
-    meeting = Meeting.get(params[:meeting_id])
-    meeting.update(:accepted => true)
+    meeting = Meeting.get(meeting_id)
+    meeting.accepted = true
+    meeting.save
+
+    #Remove the old post
+    m_offer = meeting.offer
+    m_offer.active = false
+    m_offer.accepted = true
+    m_offer.archive = true
+    m_offer.save
+    post = Post.get(m_offer.post_id)
+    post.offers = []
+    result = post.destroy
   end
 
   def create_meeting(offer, book, params)

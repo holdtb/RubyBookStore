@@ -103,6 +103,16 @@ class Bookstore < Sinatra::Base
       @messages << "Pending" if !m.accepted && !m.declined
     end
     @posts = Post.all(:seller => @user)
+
+    # Remove posts that have meetings that are accepted
+    @meetings.each do |m|
+      @posts.each do |p|
+        p.offers.each do |po|
+          @posts.delete_if{po.id == m.id and m.declined == false}
+        end
+      end
+    end
+
     @books = @meetings.map{|m| Book.get(m.book_id)}
 
     erb :"sales/index"
@@ -164,17 +174,17 @@ class Bookstore < Sinatra::Base
     end
 
     @books = @meetings.map{|m| Book.get(m.book_id)}
-
     @active_offers = Offer.all(:buyer => @user, :active => true, :accepted => false)
 
     @count = 0
     @active_offers.each do |ao|
       post = Post.get(ao.post_id)
       @count = @count + 1 if post.offers.select{|o| o.active && !o.meeting_id.nil?}.length > 0
+
     end
 
-    @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false)
-    @accepted_offers = Offer.all(:buyer => @user, :active => false, :accepted => true)
+    @declined_offers = Offer.all(:buyer => @user, :active => false, :accepted => false, :archive => false)
+    @accepted_offers = Offer.all(:buyer => @user, :active => false, :accepted => true, :archive => false)
     erb :"offers/index"
   end
 

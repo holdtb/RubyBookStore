@@ -8,6 +8,7 @@ class Offer
   property :active, Boolean
   property :accepted, Boolean
   property :created_at , DateTime
+  property :archive, Boolean
 
   belongs_to :post
   belongs_to :meeting, :required => false

@@ -34,7 +34,7 @@
 <div class="container" id="main">
    <div align="center">
       <% if (@active_offers.length < 1 && @declined_offers.length < 1 && @accepted_offers.length < 1) %>
-         <%= "<h2>You haven't made any offers yet.</h2></br><a href='/buying'>Buy Books</a>" %>
+         <%= "<h2>No offers to display.</h2></br><a href='/buying'>Buy Books</a>" %>
       <% end %>
      <%= "<h1>Your Meetings:</h1>" if @meetings.length > 0 %>
       <% @meetings.each_with_index do |meeting, i|%>

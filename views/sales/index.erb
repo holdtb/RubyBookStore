@@ -49,13 +49,13 @@
              <strong>Meeting Location: </strong> <%= meeting.location %></br>
              <strong>Meeting Date: </strong> <%= meeting.date %></br>
              <strong>Meeting Time: </strong> <%= meeting.time %></br>
-             <strong>Sale price: </strong> $<%= offer.price %>.00</br></br>
+             <strong>Sale price: </strong> $<%= offer.price if !offer.nil? %>.00</br></br>
            </p>
          </div>
      </div>
      <% end %>
      <% if @posts.length > 0 %><h1>Your Sales:</h1><% end %>
-     <% if @posts.length < 1 %><h1>You haven't put any books up for sale yet.</h1>
+     <% if (@posts.length < 1) and (@meetings.length < 1) %><h1>You haven't put any books up for sale yet.</h1>
      <a href="/selling">Sell textbooks</a><% end %>
      <% @posts.each_with_index do |post, i|%>
       <% book = Book.get(post.book_id) %>
