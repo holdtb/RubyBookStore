@@ -45,7 +45,6 @@ module GoogleBookScraper
     avg_rating = volume_info['averageRating']
     thumbnail = volume_info['imageLinks']['thumbnail']
     authors = volume_info['authors']
-    binding.pry
 
     book = Book.create({
       :title => title,

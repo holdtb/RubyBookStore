@@ -1,4 +1,5 @@
 require 'pry'
+require 'obscenity'
 module BookstoreHelper
 
   def get_new_posts
@@ -82,6 +83,27 @@ module BookstoreHelper
     session[:book_id] = book_id
     session[:verified] = verified
   end
+
+  # def cleanse(book)
+  #   authors = Author.all(:book_id => book.id)
+  # 
+  #   # authors.each do |a|
+  #   #   new_author = Obscenity.replacement(:stars).sanitize(a.name)
+  #   #   a.name = new_author
+  #   #   result = a.save
+  #   #   binding.pry
+  #   # end
+  #   author = authors[0]
+  #   author.name = Obscenity.replacement(:stars).sanitize(author.name)
+  #   result = author.save
+  #   binding.pry
+  #
+  #   new_title = Obscenity.replacement(:stars).sanitize(book.title)
+  #   book.title = new_title
+  #   result = book.save
+  #   binding.pry
+  #   book
+  # end
 
 ####SELLING#####
 

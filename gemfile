@@ -2,8 +2,6 @@ source "https://rubygems.org"
 gem 'sinatra'
 gem 'sinatra-reloader'
 gem 'sinatra-contrib'
-gem 'mongo'
-gem 'mongo_mapper'
 gem "bson", "~> 1.9.2"
 gem 'bson_ext'
 gem 'rack'
@@ -18,3 +16,4 @@ gem 'sinatra-formkeeper'
 gem 'data_mapper'
 gem 'dm-sqlite-adapter'
 gem 'sqlite3'
+gem 'obscenity'

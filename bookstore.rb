@@ -8,6 +8,7 @@ require 'dm-sqlite-adapter'
 require 'sqlite3'
 require 'lisbn'
 require 'chronic'
+require 'obscenity'
 Dir.glob('lib/**/*.rb') { |f| require_relative f }
 Dir["./model/*.rb"].each {|file| require file }
 DataMapper.setup :default, "sqlite3://#{Dir.pwd}/database.db"
@@ -61,9 +62,9 @@ class Bookstore < Sinatra::Base
     else
       authors = [] << params[:author]
       unverified_book = Book.create(
-          :title => params[:title],
+          :title => Obscenity.replacement(:stars).sanitize(params[:title]),
           :isbn => params[:isbn],
-          :authors => authors.map{|a| Author.create(:name => a)}
+          :authors => authors.map{|a| Author.create(:name => Obscenity.replacement(:stars).sanitize(a))}
       )
 
       confirm_post(unverified_book.id, params[:price], params[:condition], false)
@@ -75,7 +76,9 @@ class Bookstore < Sinatra::Base
     @condition = session[:condition]
     @price = session[:price]
     @book = Book.get(session[:book_id])
+    # @book = cleanse(book)
     @authors = Author.all(:book_id => session[:book_id])
+    binding.pry
     @verified = session[:verified]
     erb :"selling/confirm"
   end
