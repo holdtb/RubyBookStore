@@ -2,9 +2,8 @@ require 'pry'
 require 'obscenity'
 module BookstoreHelper
 
-  def get_new_posts
-    #Post.sort(:created_at.desc).limit(4).all
-    Post.all(:limit => 4, :order => [:created_at.desc])
+  def get_new_posts(username)
+    Post.all(:limit => 6, :order => [:created_at.desc]) - Post.all(:seller => username)
   end
 
   def get_authors(posts)
@@ -17,7 +16,7 @@ module BookstoreHelper
     authors
   end
 
-  def get_posts(isbns)
+  def get_posts(isbns, username)
     posts = []
     isbns.each do |isbn|
       #book = Book.where(:isbn => isbn).all
@@ -26,7 +25,7 @@ module BookstoreHelper
         book = book.first
       end
 
-      posts_found = Post.all(:book_id => book.id) if !book.nil?
+      posts_found = Post.all(:book_id => book.id) - Post.all(:seller => username) if !book.nil?
       posts.concat posts_found if !posts_found.nil? && posts_found.length > 0
     end
     posts
@@ -43,7 +42,7 @@ module BookstoreHelper
 
     book = Book.all(:title.like => params[:title]+"%") if params[:title] != ""
     book_isbns.concat book.map(&:isbn) if book && book.length > 0
-    book_isbns
+    book_isbns.uniq
   end
 
 
@@ -86,7 +85,7 @@ module BookstoreHelper
 
   # def cleanse(book)
   #   authors = Author.all(:book_id => book.id)
-  # 
+  #
   #   # authors.each do |a|
   #   #   new_author = Obscenity.replacement(:stars).sanitize(a.name)
   #   #   a.name = new_author

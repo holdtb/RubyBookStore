@@ -35,14 +35,14 @@ class Bookstore < Sinatra::Base
   end
 
   get '/buying' do
-    @recent_posts = get_new_posts
+    @recent_posts = get_new_posts(@user)
     @authors = get_authors(@recent_posts)
     erb :"buying/index"
   end
 
   post '/buying' do
     book_isbns = get_book_isbns(params)
-    @posts = get_posts(book_isbns)
+    @posts = get_posts(book_isbns, @user)
     @authors = get_authors(@posts)
     redirect '/not_found' unless @posts.length > 0
     erb :"/buying/results"
@@ -76,9 +76,7 @@ class Bookstore < Sinatra::Base
     @condition = session[:condition]
     @price = session[:price]
     @book = Book.get(session[:book_id])
-    # @book = cleanse(book)
     @authors = Author.all(:book_id => session[:book_id])
-    binding.pry
     @verified = session[:verified]
     erb :"selling/confirm"
   end
