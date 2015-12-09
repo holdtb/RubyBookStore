@@ -126,6 +126,11 @@ end
   def create_offer_asking_price(post_id) #/offer/make/asking/:post_id
     post = Post.get(post_id)
 
+    buyers_previous_offers = post.offers.select{|o| o.buyer == @user}
+    if buyers_previous_offers.length > 0 then
+      redirect '/error/restricted'
+    end
+
     email_address = "#{post.seller}@students.wwu.edu"
     subj = "New offer on #{Book.get(post.book_id).title}"
     body_msg = "Hey,\n\n We wanted to let you know that you have received an offer on the WWU Bookstore!\n View the offer at http://107.170.193.84/sales\n\n -Bookstore"
@@ -190,12 +195,7 @@ end
   ##################Meetings############################
 
   def decline_meeting(meeting_id)
-    #TODO:Email both parties
-
-
-
-
-
+    #TODO: Email both parties?
     meeting = Meeting.get(meeting_id)
     meeting.accepted = false
     meeting.declined = true

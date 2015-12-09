@@ -127,7 +127,7 @@ class Bookstore < Sinatra::Base
   get '/sales/delete/:post_id' do
     post = Post.get(params[:post_id])
     if post.seller == @user then
-      #Delete post offers then delete the post
+      #Delete post offers then delete the post itself
       post.offers.each do |o|
         result = o.destroy
       end
@@ -224,6 +224,10 @@ class Bookstore < Sinatra::Base
   get '/offer/accept/:offer_id' do
     accept_offer(params)
     erb :"offers/accept"
+  end
+
+  get '/error/restricted' do
+    erb :"error/restricted"
   end
 
 end
