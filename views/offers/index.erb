@@ -33,6 +33,7 @@
 <!--main-->
 <div class="container" id="main">
    <div align="center">
+     <div class="col-md-8">
       <% if (@active_offers.length < 1 && @declined_offers.length < 1 && @accepted_offers.length < 1) %>
          <%= "<h2>No pending offers to display.</h2></br><a href='/buying'>Buy Books</a>" %>
       <% end %>
@@ -42,6 +43,7 @@
       <% offer = Offer.get(meeting.offer_id) %>
        <div class="panel panel-primary">
          <div class="panel-heading">
+          <span class="pull-left"><button type="button" class="btn btn-danger"><img style="width:16px;height:16px" src="/images/trash.png" alt="Delete Post"> Delete Post</button></span>
            <h3 class="panel-title"><%= "Proposal from seller of " + book.title %></h3>
          </div>
          <div class="panel-body">
@@ -75,7 +77,7 @@
              <strong>List Date: </strong><%= post.created_at %></br>
              <strong>List Price: </strong>$<%= session[:price] %></br>
              <strong>Condition: </strong><%= post.condition.capitalize! %></br></br>
-             <strong>Your offer of <%= offer.price %> was accepted! </strong></br>
+             <strong>Your offer of <%= offer.price %>.00 was accepted! </strong></br>
            </p>
          </div>
      </div>
@@ -104,7 +106,7 @@
              <% offer = post.offers.map(&:id) %>
              <% buyers = post.offers.map(&:buyer) %>
              <% prices.each_with_index do |p, i| %>
-              $<%= p %> - on <%= post.offers[i].created_at.strftime('%m/%d/%Y at %l:%M %p') %></br>
+              $<%= p %>.00 - on <%= post.offers[i].created_at.strftime('%m/%d/%Y at %l:%M %p') %></br>
              <% end %>
            </p>
          </div>
@@ -133,6 +135,7 @@
        </div>
    </div>
    <% end %>
+ </div>
  </div>
  </div>
 </div>

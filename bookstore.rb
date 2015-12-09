@@ -124,6 +124,13 @@ class Bookstore < Sinatra::Base
     erb :"sales/success"
   end
 
+  get '/sales/delete/:post_id' do
+    post = Post.get(params[:post_id])
+    result = post.destroy
+    
+    redirect '/sales'
+  end
+
   post '/meeting/create/:offer_id' do
     @offer = Offer.get(params[:offer_id])
     @post = Post.get(@offer.post_id)
