@@ -3,8 +3,23 @@ require 'obscenity'
 require 'mail'
 module BookstoreHelper
 
+  options = { :address              => "smtp.gmail.com",
+            :port                 => 587,
+            :domain               => 'localhost',
+            :user_name            => 'books.western@gmail.com',
+            :password             => 's34h4wks',
+            :authentication       => 'plain',
+            :enable_starttls_auto => true  }
+
+
+
+Mail.defaults do
+  delivery_method :smtp, options
+end
+
+
   def get_new_posts(username)
-    Post.all(:limit => 6, :order => [:created_at.desc]) - Post.all(:seller => username)
+    Post.all(:limit => 6, :order => [:created_at.desc]) # - Post.all(:seller => username)
   end
 
   def get_authors(posts)
@@ -112,19 +127,16 @@ module BookstoreHelper
     post = Post.get(post_id)
 
     email_address = "#{post.seller}@students.wwu.edu"
-    subject = "New offer on" + Book.get(post.book_id).title
-    body_msg = "Hey, \n We wanted to let you know that you have received an offer on the WWU Bookstore!\n
-    Check it out at http://107.170.193.84/sales"
+    subj = "New offer on #{Book.get(post.book_id).title}"
+    body_msg = "Hey,\n\n We wanted to let you know that you have received an offer on the WWU Bookstore!\n View the offer at http://107.170.193.84/sales\n\n -Bookstore"
     mail = Mail.new do
       from     'books.western@gmail.com'
       to       email_address
-      subject  'New offer on '
+      subject  subj
       body     body_msg
     end
 
-    binding.pry
-    #mail.deliver!
-
+    mail.deliver!
 
     offer = Offer.create(
                     :seller => post.seller,
@@ -141,9 +153,22 @@ module BookstoreHelper
   end
 
   def decline_offer(offer_id) #/offer/decline/:offer_id
-    #TODO:Email buy that their offer was declined
-
     offer = Offer.get(offer_id)
+    post = Post.get(offer.post_id)
+    book = Book.get(post.book_id)
+
+    email_address = "#{offer.buyer}@students.wwu.edu"
+    subj = "Your offer on #{book.title} was declined by the seller"
+    body_msg = "Hey,\n\n We wanted to let you know that your offer of $#{post.price}.00 on #{book.title} was declined.\n You're welcome to browse other books at http://107.170.193.84/buying\n\n -Bookstore"
+    mail = Mail.new do
+      from     'books.western@gmail.com'
+      to       email_address
+      subject  subj
+      body     body_msg
+    end
+
+    mail.deliver!
+
     offer.active = false
     offer.accepted = false
     offer.save
@@ -166,6 +191,11 @@ module BookstoreHelper
 
   def decline_meeting(meeting_id)
     #TODO:Email both parties
+
+
+
+
+
     meeting = Meeting.get(meeting_id)
     meeting.accepted = false
     meeting.declined = true

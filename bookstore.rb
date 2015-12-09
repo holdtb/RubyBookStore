@@ -126,8 +126,15 @@ class Bookstore < Sinatra::Base
 
   get '/sales/delete/:post_id' do
     post = Post.get(params[:post_id])
-    result = post.destroy
-    
+    if post.seller == @user then
+      #Delete post offers then delete the post
+      post.offers.each do |o|
+        result = o.destroy
+      end
+      post.offers = []
+      result = post.destroy
+    end
+
     redirect '/sales'
   end
 
