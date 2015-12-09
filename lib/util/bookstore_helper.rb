@@ -126,7 +126,7 @@ end
   def create_offer_asking_price(post_id) #/offer/make/asking/:post_id
     post = Post.get(post_id)
 
-    buyers_previous_offers = post.offers.select{|o| o.buyer == @user}
+    buyers_previous_offers = post.offers.select{|o| o.buyer == @user and o.active}
     if buyers_previous_offers.length > 0 then
       redirect '/error/restricted'
     end
@@ -176,8 +176,8 @@ end
 
     offer.active = false
     offer.accepted = false
+    offer.archive = false
     offer.save
-    post = Post.get(offer.post_id)
     post.offers.delete(offer)
     post.offers.save
   end
