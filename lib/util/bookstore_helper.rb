@@ -1,5 +1,6 @@
 require 'pry'
 require 'obscenity'
+require 'mail'
 module BookstoreHelper
 
   def get_new_posts(username)
@@ -9,7 +10,6 @@ module BookstoreHelper
   def get_authors(posts)
     authors = []
     posts.each do |post|
-      #authors_found = Author.where(:book_id => post.book_id).fields(:name).all
       authors_found = Author.all(:book_id => post.book_id)
       authors << authors_found.map(&:name)
     end
@@ -19,7 +19,6 @@ module BookstoreHelper
   def get_posts(isbns, username)
     posts = []
     isbns.each do |isbn|
-      #book = Book.where(:isbn => isbn).all
       book = Book.all(:isbn => isbn)
       if !book.nil?
         book = book.first
@@ -83,30 +82,10 @@ module BookstoreHelper
     session[:verified] = verified
   end
 
-  # def cleanse(book)
-  #   authors = Author.all(:book_id => book.id)
-  #
-  #   # authors.each do |a|
-  #   #   new_author = Obscenity.replacement(:stars).sanitize(a.name)
-  #   #   a.name = new_author
-  #   #   result = a.save
-  #   #   binding.pry
-  #   # end
-  #   author = authors[0]
-  #   author.name = Obscenity.replacement(:stars).sanitize(author.name)
-  #   result = author.save
-  #   binding.pry
-  #
-  #   new_title = Obscenity.replacement(:stars).sanitize(book.title)
-  #   book.title = new_title
-  #   result = book.save
-  #   binding.pry
-  #   book
-  # end
-
 ####SELLING#####
 
-  def create_post(book_id) #/selling/SELLING
+  #/selling/SELLING
+  def create_post(book_id)
     book = Book.get(book_id)
     post = Post.create(
                    :book_id => book.id,
@@ -120,7 +99,8 @@ module BookstoreHelper
 
   ####################Offer#############################
 
-  def view_post(post_id) #/offer/:post_id
+  #/offer/:post_id
+  def view_post(post_id)
     @post = Post.get(post_id)
     @book = Book.get(@post.book_id)
     authors = Author.all(:book_id => @book.id)
@@ -129,8 +109,23 @@ module BookstoreHelper
   end
 
   def create_offer_asking_price(post_id) #/offer/make/asking/:post_id
-    #TODO:Email post.seller@students.wwu.edu with the offer
     post = Post.get(post_id)
+
+    email_address = "#{post.seller}@students.wwu.edu"
+    subject = "New offer on" + Book.get(post.book_id).title
+    body_msg = "Hey, \n We wanted to let you know that you have received an offer on the WWU Bookstore!\n
+    Check it out at http://107.170.193.84/sales"
+    mail = Mail.new do
+      from     'books.western@gmail.com'
+      to       email_address
+      subject  'New offer on '
+      body     body_msg
+    end
+
+    binding.pry
+    #mail.deliver!
+
+
     offer = Offer.create(
                     :seller => post.seller,
                     :buyer => @user,
